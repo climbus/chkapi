@@ -1,3 +1,4 @@
+from dataclasses import InitVar
 import sys
 from typing import cast
 
@@ -7,10 +8,16 @@ from rich.json import JSON
 from rich.align import Align
 from rich.panel import Panel
 from textual.app import App
+from textual.message import Message
 from textual.views import GridView
 from textual.widget import Reactive
 from textual.widgets import Button, ButtonPressed, ScrollView
 from textual_inputs import TextInput
+from textual import events
+
+
+class UrlChanged(Message, bubble=True):
+    pass
 
 
 class URLField(TextInput):
@@ -20,6 +27,10 @@ class URLField(TextInput):
     @property
     def url(self):
         return self.value
+
+    async def on_key(self, event: events.Key) -> None:
+        if event.key == "enter":
+            await self.emit(UrlChanged(self))
 
 
 class URLButton(Button, can_focus=True):
@@ -91,6 +102,9 @@ class RestChecker(App):
     async def handle_button_pressed(self, message: ButtonPressed) -> None:
         button = cast(URLButton, message.sender)
         button.has_focus = False
+        await self.load_url(self.url_view.url)
+
+    async def handle_url_changed(self):
         await self.load_url(self.url_view.url)
 
     def _get_url_content(self, url):
