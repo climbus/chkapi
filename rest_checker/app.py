@@ -1,13 +1,15 @@
 import sys
+from typing import cast
 
 from requests import request
 from rich import box
+from rich.json import JSON
 from rich.align import Align
 from rich.panel import Panel
 from textual.app import App
 from textual.views import GridView
 from textual.widget import Reactive
-from textual.widgets import Button, Placeholder, ScrollView
+from textual.widgets import Button, ButtonPressed, Placeholder, ScrollView
 from textual_inputs import TextInput
 
 
@@ -67,16 +69,13 @@ class URLView(GridView):
 class RestChecker(App):
     async def on_mount(self):
         url_view = URLView(self.url)
+        self.body = ScrollView()
         await self.view.dock(url_view, size=3, edge="top")
-        await self.view.dock(Placeholder(name="body"), edge="bottom")
+        await self.view.dock(self.body, edge="bottom")
 
-        async def load_url():
-            self.log(f"loads: {self.url}")
-            # content = self._get_url_content()
-            # await self.body.update(JSON(content.text))
-            self.log("url loaded")
-
-        await self.call_later(load_url)
+    async def load_url(self):
+        content = self._get_url_content()
+        await self.body.update(JSON(content.text))
 
     async def on_load(self):
         await self.bind("q", "quit")
@@ -85,6 +84,11 @@ class RestChecker(App):
 
         self.body = ScrollView()
         self.url_field = URLField(self.url)
+
+    async def handle_button_pressed(self, message: ButtonPressed) -> None:
+        button = cast(URLButton, message.sender)
+        button.has_focus = False
+        await self.load_url()
 
     def _get_url_content(self):
         return request("get", self.url)
