@@ -1,0 +1,6 @@
+.ropeproject
+.tool-versions
+textual.log
+.pytest_cache
+poetry.lock
+*/__pycache__
