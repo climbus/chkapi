@@ -25,7 +25,7 @@ class URLField(TextInput):
         super().__init__(value=url, title="URL")
 
     @property
-    def url(self):
+    def url(self) -> str:
         return self.value
 
     async def on_key(self, event: events.Key) -> None:
