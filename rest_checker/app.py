@@ -77,6 +77,9 @@ class URLView(GridView):
     def url(self):
         return self.url_field.url
 
+    async def on_focus(self):
+        await self.url_field.focus()
+
 
 class RestChecker(App):
     async def on_mount(self):
@@ -106,6 +109,11 @@ class RestChecker(App):
 
     async def handle_url_changed(self):
         await self.load_url(self.url_view.url)
+
+    async def on_key(self, event: events.Key) -> None:
+        if event.key == "ctrl+l":
+            await self.url_view.focus()
+        return await super().on_key(event)
 
     def _get_url_content(self, url):
         return request("get", url)
