@@ -19,7 +19,6 @@ from rest_checker.api_reader import URL, APIReader, AsyncAPIReader
 class UrlChanged(Message, bubble=True):
     pass
 
-
 class URLField(TextInput):
     def __init__(self, url):
         super().__init__(value=url, title="URL")
@@ -36,6 +35,10 @@ class URLField(TextInput):
 class URLButton(Button, can_focus=True):
     has_focus: Reactive[bool] = Reactive(False)
     mouse_over: Reactive[bool] = Reactive(False)
+    label: str = "GO"
+
+    def __init__(self, label=label):
+        super().__init__(label=label)
 
     def render(self):
         return Panel(
@@ -60,10 +63,12 @@ class URLButton(Button, can_focus=True):
 
 class URLView(GridView):
     url_field: URLField
+    button: Button
 
     def __init__(self, url: str = "") -> None:
         super().__init__()
         self.url_field = URLField(url)
+        self.button = URLButton()
 
     async def on_mount(self):
         self.grid.add_column("url")
@@ -71,7 +76,7 @@ class URLView(GridView):
         self.grid.add_row("main", size=3)
         self.grid.add_areas(url="url,main", button="button,main")
         self.grid.place(url=self.url_field)
-        self.grid.place(button=URLButton(label="GO"))
+        self.grid.place(button=self.button)
 
     @property
     def url(self):
