@@ -1,9 +1,11 @@
-from rest_checker.app import RestChecker
-from rich.console import Console
-from io import StringIO
-import pytest
 import asyncio
+from io import StringIO
+
 import pyautogui
+import pytest
+from rich.console import Console
+
+from rest_checker.app import RestChecker
 
 
 def create_app():
