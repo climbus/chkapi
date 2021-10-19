@@ -1,6 +1,6 @@
 from dataclasses import InitVar
 import sys
-from typing import cast
+from typing import Protocol, cast
 
 from requests import request
 from rich import box
@@ -80,8 +80,18 @@ class URLView(GridView):
     async def on_focus(self):
         await self.url_field.focus()
 
+class APIReader(Protocol):
+    pass
+
+class AsyncAPIReader(object):
+    pass
 
 class RestChecker(App):
+    api_reader: APIReader
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.api_reader = AsyncAPIReader()
+
     async def on_mount(self):
         self.url_view = URLView(self.url)
         self.body = ScrollView()
@@ -92,7 +102,7 @@ class RestChecker(App):
         self.log(f"Loading url {url}")
         content = self._get_url_content(url)
         self.log(f"Response: {content}")
-        await self.body.update(JSON(content.text))
+        await self.body.update(JSON(content))
 
     async def on_load(self):
         await self.bind("q", "quit")
@@ -116,7 +126,7 @@ class RestChecker(App):
         return await super().on_key(event)
 
     def _get_url_content(self, url):
-        return request("get", url)
+        return request("get", url).text
 
     def _get_url_from_attrs(self) -> str:
         if len(sys.argv) > 1:
