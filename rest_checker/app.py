@@ -1,5 +1,4 @@
 import sys
-from typing import cast
 
 from rich import box
 from rich.align import Align
@@ -7,17 +6,13 @@ from rich.json import JSON
 from rich.panel import Panel
 from textual import events
 from textual.app import App
-from textual.message import Message
 from textual.views import GridView
 from textual.widget import Reactive
-from textual.widgets import Button, ButtonPressed, ScrollView
+from textual.widgets import Button, ScrollView
 from textual_inputs import TextInput
 
 from rest_checker.api_reader import URL, APIReader, AsyncAPIReader
-
-
-class UrlChanged(Message, bubble=True):
-    pass
+from rest_checker.events import UrlChanged
 
 
 class URLField(TextInput):
