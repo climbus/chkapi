@@ -1,14 +1,11 @@
 from dataclasses import dataclass
 import sys
-from typing import Protocol, cast
-from warnings import resetwarnings
+from typing import cast
 
-from requests import request
 from rich import box
 from rich.json import JSON
 from rich.align import Align
 from rich.panel import Panel
-from rich.repr import Result
 from textual.app import App
 from textual.message import Message
 from textual.views import GridView
@@ -17,7 +14,7 @@ from textual.widgets import Button, ButtonPressed, ScrollView
 from textual_inputs import TextInput
 from textual import events
 
-import httpx
+from rest_checker.api_reader import APIReader, AsyncAPIReader, URL
 
 
 class UrlChanged(Message, bubble=True):
@@ -83,23 +80,6 @@ class URLView(GridView):
 
     async def on_focus(self):
         await self.url_field.focus()
-
-
-@dataclass
-class URL(object):
-    url: str
-
-
-class APIReader(Protocol):
-    async def read_url(self, url: URL) -> str:
-        ...
-
-
-class AsyncAPIReader(object):
-    async def read_url(self, url: URL) -> str:
-        async with httpx.AsyncClient() as client:
-            result = await client.get(url.url)
-            return result.text
 
 
 class RestChecker(App):
