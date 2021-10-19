@@ -19,6 +19,7 @@ from rest_checker.api_reader import URL, APIReader, AsyncAPIReader
 class UrlChanged(Message, bubble=True):
     pass
 
+
 class URLField(TextInput):
     def __init__(self, url):
         super().__init__(value=url, title="URL")
@@ -59,6 +60,10 @@ class URLButton(Button, can_focus=True):
 
     async def on_leave(self) -> None:
         self.mouse_over = False
+
+    async def on_click(self, event: events.Click) -> None:
+        self.has_focus = False
+        await self.emit(UrlChanged(self))
 
 
 class URLView(GridView):
@@ -112,11 +117,6 @@ class RestChecker(App):
 
         self.body = ScrollView()
         self.url_field = URLField(self.url)
-
-    async def handle_button_pressed(self, message: ButtonPressed) -> None:
-        button = cast(URLButton, message.sender)
-        button.has_focus = False
-        await self.load_url(self.url_view.url)
 
     async def handle_url_changed(self):
         await self.load_url(self.url_view.url)
