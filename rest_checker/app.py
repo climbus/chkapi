@@ -1,12 +1,14 @@
-from dataclasses import InitVar
+from dataclasses import dataclass
 import sys
 from typing import Protocol, cast
+from warnings import resetwarnings
 
 from requests import request
 from rich import box
 from rich.json import JSON
 from rich.align import Align
 from rich.panel import Panel
+from rich.repr import Result
 from textual.app import App
 from textual.message import Message
 from textual.views import GridView
@@ -14,6 +16,8 @@ from textual.widget import Reactive
 from textual.widgets import Button, ButtonPressed, ScrollView
 from textual_inputs import TextInput
 from textual import events
+
+import httpx
 
 
 class UrlChanged(Message, bubble=True):
@@ -81,12 +85,21 @@ class URLView(GridView):
         await self.url_field.focus()
 
 
+@dataclass
+class URL(object):
+    url: str
+
+
 class APIReader(Protocol):
-    pass
+    async def read_url(self, url: URL) -> str:
+        ...
 
 
 class AsyncAPIReader(object):
-    pass
+    async def read_url(self, url: URL) -> str:
+        async with httpx.AsyncClient() as client:
+            result = await client.get(url.url)
+            return result.text
 
 
 class RestChecker(App):
@@ -104,7 +117,7 @@ class RestChecker(App):
 
     async def load_url(self, url):
         self.log(f"Loading url {url}")
-        content = self._get_url_content(url)
+        content = await self._get_url_content(url)
         self.log(f"Response: {content}")
         await self.body.update(JSON(content))
 
@@ -129,8 +142,8 @@ class RestChecker(App):
             await self.url_view.focus()
         return await super().on_key(event)
 
-    def _get_url_content(self, url):
-        return request("get", url).text
+    async def _get_url_content(self, url):
+        return await self.api_reader.read_url(URL(url))
 
     def _get_url_from_attrs(self) -> str:
         if len(sys.argv) > 1:
