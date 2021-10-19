@@ -80,14 +80,18 @@ class URLView(GridView):
     async def on_focus(self):
         await self.url_field.focus()
 
+
 class APIReader(Protocol):
     pass
+
 
 class AsyncAPIReader(object):
     pass
 
+
 class RestChecker(App):
     api_reader: APIReader
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.api_reader = AsyncAPIReader()
