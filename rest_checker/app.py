@@ -81,7 +81,7 @@ class URLButton(Button, can_focus=True):
     async def on_leave(self) -> None:
         self.mouse_over = False
 
-    async def on_click(self, event: events.Click) -> None:
+    async def on_click(self) -> None:
         self.has_focus = False
         await self.emit(UrlChanged(self))
 
