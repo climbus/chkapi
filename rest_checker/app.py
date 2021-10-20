@@ -136,6 +136,7 @@ class RestChecker(App):
         except BadUrlException as e:
             content = self._error_message(str(e))
             response_time = None
+
         await self.body.update(content)
         self.footer.response_time = response_time
 
