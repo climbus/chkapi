@@ -37,7 +37,14 @@ class AsyncAPIReader(object):
             raise BadUrlException()
 
         async with httpx.AsyncClient() as client:
-            result = await client.get(url.url)
+            try:
+                result = await client.get(url.url)
+            except httpx.ConnectError:
+                raise HttpError("Connection Error")
+            except Exception as e:
+                raise HttpError(str(e))
+
             if result.status_code != 200:
                 raise HttpError(self.status_list[result.status_code])
+
             return result.text

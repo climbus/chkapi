@@ -24,6 +24,7 @@ async def test_should_get_content_from_server(httpserver: HTTPServer):
 
     assert result == expected_result
 
+
 @pytest.mark.asyncio
 async def test_should_raise_http_error_when_status_is_404(httpserver: HTTPServer):
     path = "/"
@@ -32,6 +33,17 @@ async def test_should_raise_http_error_when_status_is_404(httpserver: HTTPServer
 
     reader = AsyncAPIReader()
 
-
     with pytest.raises(HttpError, match="Not Found: Nothing matches the given URI"):
+        await reader.read_url(URL(url))
+
+
+@pytest.mark.asyncio
+async def test_should_raise_http_error_when_connection_error(httpserver: HTTPServer):
+    path = "/"
+    httpserver.expect_request(path).respond_with_data("", status=200)
+    httpserver.stop()
+    url = httpserver.url_for(path)
+    reader = AsyncAPIReader()
+
+    with pytest.raises(HttpError, match="Connection Error"):
         await reader.read_url(URL(url))
