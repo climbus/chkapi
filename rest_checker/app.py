@@ -13,7 +13,7 @@ from textual_inputs import TextInput
 
 from rest_checker.api_reader import URL, APIReader, AsyncAPIReader
 from rest_checker.events import UrlChanged
-from rest_checker.exceptions import HttpError
+from rest_checker.exceptions import BadUrlException, HttpError
 
 
 class URLField(TextInput):
@@ -104,8 +104,13 @@ class RestChecker(App):
         try:
             content = JSON(await self._get_url_content(url))
         except HttpError as e:
-            content = Panel(Align.center(str(e)), style="red on black")
+            content = self._error_message(str(e))
+        except BadUrlException as e:
+            content = self._error_message(str(e))
         await self.body.update(content)
+
+    def _error_message(self, e: str):
+        return Panel(Align.center(e), style="red on black")
 
     async def on_load(self):
         await self.bind("q", "quit")
