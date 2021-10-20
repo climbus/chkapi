@@ -10,6 +10,7 @@ from rich.panel import Panel
 from rich.text import Text
 from textual import events
 from textual.app import App
+from textual.view import View
 from textual.views import GridView
 from textual.widget import Reactive, Widget
 from textual.widgets import Button, Footer, ScrollView
@@ -113,8 +114,10 @@ class URLView(GridView):
 
 class RestChecker(App):
     api_reader: APIReader
+
     footer: ApiFooter
     url_view: URLView
+    body: ScrollView
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
