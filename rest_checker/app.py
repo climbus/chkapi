@@ -35,7 +35,7 @@ class ApiFooter(Footer):
                     f"Response time: {self.response_time:.2f}s",
                     style="white on dark_green",
                     justify="right",
-                )
+                ),
             )
         return content
 
@@ -129,14 +129,21 @@ class RestChecker(App):
 
     async def load_url(self, url):
         try:
-            start = timeit.default_timer()
-            content = JSON(await self._get_url_content(url))
-            self.footer.response_time = timeit.default_timer() - start
+            content, response_time = await self._get_content_with_time(url)
         except HttpError as e:
             content = self._error_message(str(e))
+            response_time = None
         except BadUrlException as e:
             content = self._error_message(str(e))
+            response_time = None
         await self.body.update(content)
+        self.footer.response_time = response_time
+
+    async def _get_content_with_time(self, url):
+        start = timeit.default_timer()
+        content = JSON(await self._get_url_content(url))
+        response_time = timeit.default_timer() - start
+        return (content, response_time)
 
     def _error_message(self, e: str):
         return Panel(Align.center(e), style="red on black")
