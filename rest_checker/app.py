@@ -121,8 +121,8 @@ class RestChecker(App):
         self.api_reader = AsyncAPIReader()
 
     async def on_mount(self):
-        self.url_view = URLView(self.url)
         self.body = ScrollView()
+        self.url_view = URLView(self.url)
         self.footer = ApiFooter()
         await self.view.dock(self.url_view, size=3, edge="top")
         await self.view.dock(self.footer, edge="bottom")
@@ -152,11 +152,7 @@ class RestChecker(App):
 
     async def on_load(self):
         await self.bind("q", "quit")
-
         self.url = self._get_url_from_attrs()
-
-        self.body = ScrollView()
-        self.url_field = URLField(self.url)
 
     async def handle_url_changed(self):
         await self.load_url(self.url_view.url)
