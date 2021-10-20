@@ -114,6 +114,7 @@ class URLView(GridView):
 class RestChecker(App):
     api_reader: APIReader
     footer: ApiFooter
+    url_view: URLView
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
