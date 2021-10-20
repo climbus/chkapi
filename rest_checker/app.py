@@ -91,7 +91,7 @@ class URLView(GridView):
     url_field: URLField
     button: Button
 
-    def __init__(self, url: str = "") -> None:
+    def __init__(self, url: str) -> None:
         super().__init__()
         self.url_field = URLField(url)
         self.button = URLButton()
@@ -119,7 +119,7 @@ class RestChecker(App):
     url_view: URLView
     body: ScrollView
 
-    def __init__(self, url=None, **kwargs):
+    def __init__(self, url: str="", **kwargs):
         super().__init__(**kwargs)
         self.url = url
         self.api_reader = AsyncAPIReader()
