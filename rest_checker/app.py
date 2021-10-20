@@ -1,19 +1,43 @@
 import sys
+import timeit
+from typing import Optional, cast
 
-from rich import box
+from rich import align, box
 from rich.align import Align
+from rich.console import Group, RenderableType
 from rich.json import JSON
 from rich.panel import Panel
+from rich.text import Text
 from textual import events
 from textual.app import App
 from textual.views import GridView
-from textual.widget import Reactive
-from textual.widgets import Button, ScrollView
+from textual.widget import Reactive, Widget
+from textual.widgets import Button, Footer, ScrollView
 from textual_inputs import TextInput
 
 from rest_checker.api_reader import URL, APIReader, AsyncAPIReader
 from rest_checker.events import UrlChanged
 from rest_checker.exceptions import BadUrlException, HttpError
+
+
+class ApiFooter(Footer):
+    response_time: Reactive[Optional[float]] = Reactive(None)
+
+    def on_mount(self):
+        self.response_time = None
+
+    def render(self) -> RenderableType:
+        content = cast(Text, super().render())
+        if self.response_time:
+            return Text.assemble(
+                content,
+                Text(
+                    f"Response time: {self.response_time:.2f}s",
+                    style="white on dark_green",
+                    justify="right",
+                )
+            )
+        return content
 
 
 class URLField(TextInput):
@@ -89,6 +113,7 @@ class URLView(GridView):
 
 class RestChecker(App):
     api_reader: APIReader
+    footer: ApiFooter
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -97,12 +122,16 @@ class RestChecker(App):
     async def on_mount(self):
         self.url_view = URLView(self.url)
         self.body = ScrollView()
+        self.footer = ApiFooter()
         await self.view.dock(self.url_view, size=3, edge="top")
-        await self.view.dock(self.body, edge="bottom")
+        await self.view.dock(self.footer, edge="bottom")
+        await self.view.dock(self.body, edge="top")
 
     async def load_url(self, url):
         try:
+            start = timeit.default_timer()
             content = JSON(await self._get_url_content(url))
+            self.footer.response_time = timeit.default_timer() - start
         except HttpError as e:
             content = self._error_message(str(e))
         except BadUrlException as e:
