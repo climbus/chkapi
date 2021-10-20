@@ -119,9 +119,14 @@ class RestChecker(App):
     url_view: URLView
     body: ScrollView
 
-    def __init__(self, **kwargs):
+    def __init__(self, url=None, **kwargs):
         super().__init__(**kwargs)
+        self.url = url
         self.api_reader = AsyncAPIReader()
+
+    @classmethod
+    def run(cls, url=None):
+        super().run(title="Rest Checker", log="textual.log", url=url)
 
     async def on_mount(self):
         self.body = ScrollView()
@@ -155,7 +160,6 @@ class RestChecker(App):
 
     async def on_load(self):
         await self.bind("q", "quit")
-        self.url = self._get_url_from_attrs()
 
     async def handle_url_changed(self):
         await self.load_url(self.url_view.url)
@@ -168,12 +172,10 @@ class RestChecker(App):
     async def _get_url_content(self, url):
         return await self.api_reader.read_url(URL(url))
 
-    def _get_url_from_attrs(self) -> str:
-        if len(sys.argv) > 1:
-            return sys.argv[1]
-        else:
-            return ""
-
 
 if __name__ == "__main__":
-    RestChecker.run(title="Rest Checker", log="textual.log")
+    if len(sys.argv) > 1:
+        url = sys.argv[1]
+    else:
+        url = None
+    RestChecker.run(url)
