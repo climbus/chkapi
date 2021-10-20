@@ -33,5 +33,5 @@ async def test_should_raise_http_error_when_status_is_404(httpserver: HTTPServer
     reader = AsyncAPIReader()
 
 
-    with pytest.raises(HttpError, match="Url not found"):
+    with pytest.raises(HttpError, match="Not Found: Nothing matches the given URI"):
         await reader.read_url(URL(url))
