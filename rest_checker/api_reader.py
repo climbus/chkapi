@@ -1,6 +1,7 @@
 from dataclasses import dataclass
-from typing import Dict, Protocol, cast
 from http import HTTPStatus
+from typing import Dict, Protocol, cast
+
 import httpx
 
 from rest_checker.exceptions import BadUrlException, HttpError

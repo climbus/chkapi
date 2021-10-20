@@ -13,6 +13,7 @@ from textual_inputs import TextInput
 
 from rest_checker.api_reader import URL, APIReader, AsyncAPIReader
 from rest_checker.events import UrlChanged
+from rest_checker.exceptions import HttpError
 
 
 class URLField(TextInput):
@@ -100,10 +101,11 @@ class RestChecker(App):
         await self.view.dock(self.body, edge="bottom")
 
     async def load_url(self, url):
-        self.log(f"Loading url {url}")
-        content = await self._get_url_content(url)
-        self.log(f"Response: {content}")
-        await self.body.update(JSON(content))
+        try:
+            content = JSON(await self._get_url_content(url))
+        except HttpError as e:
+            content = Panel(Align.center(str(e)), style="red on black")
+        await self.body.update(content)
 
     async def on_load(self):
         await self.bind("q", "quit")
