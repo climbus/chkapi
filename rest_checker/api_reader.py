@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from http import HTTPStatus
-from typing import Dict, Protocol, cast
+from typing import Dict, Protocol
+from urllib.parse import urlparse
 
 import httpx
 
@@ -8,8 +9,13 @@ from rest_checker.exceptions import BadUrlException, HttpError
 
 
 @dataclass
-class URL(object):
+class URL:
     url: str
+
+    def __post_init__(self):
+        url = urlparse(self.url)
+        if not url.scheme or not url.netloc:
+            raise BadUrlException("Invalid URL")
 
 
 class APIReader(Protocol):
