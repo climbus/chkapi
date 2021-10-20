@@ -2,17 +2,16 @@ import sys
 import timeit
 from typing import Optional, cast
 
-from rich import align, box
+from rich import box
 from rich.align import Align
-from rich.console import Group, RenderableType
+from rich.console import RenderableType
 from rich.json import JSON
 from rich.panel import Panel
 from rich.text import Text
 from textual import events
 from textual.app import App
-from textual.view import View
 from textual.views import GridView
-from textual.widget import Reactive, Widget
+from textual.widget import Reactive
 from textual.widgets import Button, Footer, ScrollView
 from textual_inputs import TextInput
 
