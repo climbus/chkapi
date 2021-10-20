@@ -174,8 +174,5 @@ class RestChecker(App):
 
 
 if __name__ == "__main__":
-    if len(sys.argv) > 1:
-        url = sys.argv[1]
-    else:
-        url = None
+    url = sys.argv[1] if len(sys.argv) > 1 else None
     RestChecker.run(url)
