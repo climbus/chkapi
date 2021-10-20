@@ -2,7 +2,7 @@ import pytest
 from pytest_httpserver.httpserver import HTTPServer
 
 from rest_checker.api_reader import URL, AsyncAPIReader
-from rest_checker.exceptions import BadUrlException
+from rest_checker.exceptions import BadUrlException, HttpError
 
 
 @pytest.mark.asyncio
@@ -23,3 +23,15 @@ async def test_should_get_content_from_server(httpserver: HTTPServer):
     result = await reader.read_url(URL(url))
 
     assert result == expected_result
+
+@pytest.mark.asyncio
+async def test_should_raise_http_error_when_status_is_404(httpserver: HTTPServer):
+    path = "/"
+    httpserver.expect_request(path).respond_with_data("", status=404)
+    url = httpserver.url_for(path)
+
+    reader = AsyncAPIReader()
+
+
+    with pytest.raises(HttpError, match="Url not found"):
+        await reader.read_url(URL(url))

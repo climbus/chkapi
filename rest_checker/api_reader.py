@@ -3,7 +3,7 @@ from typing import Protocol
 
 import httpx
 
-from rest_checker.exceptions import BadUrlException
+from rest_checker.exceptions import BadUrlException, HttpError
 
 
 @dataclass
@@ -22,4 +22,6 @@ class AsyncAPIReader(object):
             raise BadUrlException()
         async with httpx.AsyncClient() as client:
             result = await client.get(url.url)
+            if result.status_code == 404:
+                raise HttpError("Url not found")
             return result.text
