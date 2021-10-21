@@ -194,6 +194,7 @@ class RestChecker(App):
 
     async def handle_cancel_search(self):
         await self.body.focus()
+        await self.body.update(self.content)
 
     async def on_search(self, event):
         if self.content:
