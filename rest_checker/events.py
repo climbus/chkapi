@@ -21,5 +21,9 @@ class CancelSearch(Message):
     pass
 
 
+class FinishSearch(Message):
+    pass
+
+
 class UrlChanged(Message, bubble=True):
     pass

@@ -1,7 +1,7 @@
 import sys
 import timeit
-from typing import Optional, cast
 from copy import copy, deepcopy
+from typing import Optional, cast
 
 from rich import box
 from rich.align import Align
@@ -17,7 +17,7 @@ from textual.widgets import Button, Footer, ScrollView
 from textual_inputs import TextInput
 
 from rest_checker.api_reader import URL, APIReader, AsyncAPIReader
-from rest_checker.events import CancelSearch, Search, UrlChanged
+from rest_checker.events import CancelSearch, FinishSearch, Search, UrlChanged
 from rest_checker.exceptions import BadUrlException, HttpError
 
 
@@ -59,6 +59,10 @@ class CommandPrompt(TextInput):
         if event.key == "escape":
             await self.hide()
             await self.emit(CancelSearch(self))
+            return
+        if event.key == "enter":
+            await self.hide()
+            await self.emit(FinishSearch(self))
             return
         await self.emit(Search(self, self.value))
 
@@ -195,6 +199,9 @@ class RestChecker(App):
     async def handle_cancel_search(self):
         await self.body.focus()
         await self.body.update(self.content)
+
+    async def handle_finish_search(self):
+        await self.body.focus()
 
     async def on_search(self, event):
         if self.content:
