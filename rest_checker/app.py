@@ -1,141 +1,18 @@
 import sys
 import timeit
-from copy import copy, deepcopy
-from typing import Optional, cast
+from copy import deepcopy
 
-from rich import box
 from rich.align import Align
-from rich.console import RenderableType
 from rich.json import JSON
 from rich.panel import Panel
-from rich.text import Text
 from textual import events
 from textual.app import App
-from textual.views import GridView
-from textual.widget import Reactive
-from textual.widgets import Button, Footer, ScrollView
-from textual_inputs import TextInput
+from textual.widgets import ScrollView
 
 from rest_checker.api_reader import URL, APIReader, AsyncAPIReader
-from rest_checker.events import CancelSearch, FinishSearch, Search, UrlChanged
 from rest_checker.exceptions import BadUrlException, HttpError
-
-
-class ApiFooter(Footer):
-    response_time: Reactive[Optional[float]] = Reactive(None)
-
-    def on_mount(self):
-        self.response_time = None
-
-    def render(self) -> RenderableType:
-        content = cast(Text, super().render())
-        if self.response_time:
-            return Text.assemble(
-                content,
-                Text(
-                    f"Response time: {self.response_time:.2f}s",
-                    style="white on dark_green",
-                    justify="right",
-                ),
-            )
-        return content
-
-
-class CommandPrompt(TextInput):
-    def on_mount(self):
-        self.visible = False
-
-    async def show(self):
-        self.visible = True
-        await self.focus()
-
-    async def hide(self):
-        self.visible = False
-        self.value = ""
-
-    async def on_key(self, event: events.Key) -> None:
-        event.prevent_default().stop()
-        await super().on_key(event)
-        if event.key == "escape":
-            await self.hide()
-            await self.emit(CancelSearch(self))
-            return
-        if event.key == "enter":
-            await self.hide()
-            await self.emit(FinishSearch(self))
-            return
-        await self.emit(Search(self, self.value))
-
-
-class URLField(TextInput):
-    def __init__(self, url):
-        super().__init__(value=url, title="URL")
-
-    @property
-    def url(self) -> str:
-        return self.value
-
-    async def on_key(self, event: events.Key) -> None:
-        if event.key == "enter":
-            await self.emit(UrlChanged(self))
-
-
-class URLButton(Button, can_focus=True):
-    has_focus: Reactive[bool] = Reactive(False)
-    mouse_over: Reactive[bool] = Reactive(False)
-    label: str = "GO"
-
-    def __init__(self, label=label):
-        super().__init__(label=label)
-
-    def render(self):
-        return Panel(
-            Align.center(self.label),
-            box=box.HEAVY if self.mouse_over else box.ROUNDED,
-            style="black on white" if self.has_focus else "white on black",
-            height=3,
-        )
-
-    async def on_focus(self) -> None:
-        self.has_focus = True
-
-    async def on_blur(self) -> None:
-        self.has_focus = False
-
-    async def on_enter(self) -> None:
-        self.mouse_over = True
-
-    async def on_leave(self) -> None:
-        self.mouse_over = False
-
-    async def on_click(self) -> None:
-        self.has_focus = False
-        await self.emit(UrlChanged(self))
-
-
-class URLView(GridView):
-    url_field: URLField
-    button: Button
-
-    def __init__(self, url: str) -> None:
-        super().__init__()
-        self.url_field = URLField(url)
-        self.button = URLButton()
-
-    async def on_mount(self):
-        self.grid.add_column("url")
-        self.grid.add_column("button", size=10)
-        self.grid.add_row("main", size=3)
-        self.grid.add_areas(url="url,main", button="button,main")
-        self.grid.place(url=self.url_field)
-        self.grid.place(button=self.button)
-
-    @property
-    def url(self):
-        return self.url_field.url
-
-    async def on_focus(self):
-        await self.url_field.focus()
+from rest_checker.views import URLView
+from rest_checker.widgets import ApiFooter, CommandPrompt
 
 
 class RestChecker(App):
@@ -170,13 +47,13 @@ class RestChecker(App):
     async def load_url(self, url):
         try:
             content, response_time = await self._get_content_with_time(url)
+            self.content = content
         except HttpError as e:
             content = self._error_message(str(e))
             response_time = None
         except BadUrlException as e:
             content = self._error_message(str(e))
             response_time = None
-        self.content = content
         await self.body.update(content)
         await self.bind("/", "search")
         self.footer.response_time = response_time
@@ -202,6 +79,7 @@ class RestChecker(App):
 
     async def handle_finish_search(self):
         await self.body.focus()
+        await self.bind("n", "next_result")
 
     async def on_search(self, event):
         if self.content:
@@ -216,6 +94,9 @@ class RestChecker(App):
 
     async def action_search(self):
         await self.command_prompt.show()
+
+    async def action_next_result(self):
+        pass
 
     async def _get_url_content(self, url):
         return await self.api_reader.read_url(URL(url))
