@@ -1,4 +1,3 @@
-
 import pytest
 
 from rest_checker.api_reader import URL
