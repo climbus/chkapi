@@ -1,6 +1,7 @@
 import sys
 import timeit
 from typing import Optional, cast
+from copy import copy, deepcopy
 
 from rich import box
 from rich.align import Align
@@ -53,11 +54,13 @@ class CommandPrompt(TextInput):
         self.value = ""
 
     async def on_key(self, event: events.Key) -> None:
+        event.prevent_default().stop()
+        await super().on_key(event)
         if event.key == "escape":
             await self.hide()
             await self.emit(CancelSearch(self))
             return
-        await self.emit(Search(self, event.key))
+        await self.emit(Search(self, self.value))
 
 
 class URLField(TextInput):
@@ -139,6 +142,8 @@ class RestChecker(App):
     body: ScrollView
     command_prompt: CommandPrompt
 
+    content: JSON
+
     def __init__(self, url: str = "", **kwargs):
         super().__init__(**kwargs)
         self.url = url
@@ -167,7 +172,7 @@ class RestChecker(App):
         except BadUrlException as e:
             content = self._error_message(str(e))
             response_time = None
-
+        self.content = content
         await self.body.update(content)
         await self.bind("/", "search")
         self.footer.response_time = response_time
@@ -191,7 +196,10 @@ class RestChecker(App):
         await self.body.focus()
 
     async def on_search(self, event):
-        pass
+        if self.content:
+            content = deepcopy(self.content)
+            content.text.highlight_regex(event.value, "white on yellow")
+            await self.body.update(content)
 
     async def on_key(self, event: events.Key) -> None:
         if event.key == "ctrl+l":
