@@ -1,5 +1,9 @@
+from copy import deepcopy
+
+from rich.console import RenderableType
+from rich.json import JSON
 from textual.views import GridView
-from textual.widgets import Button
+from textual.widgets import Button, ScrollView
 
 import rest_checker.widgets
 
@@ -27,3 +31,21 @@ class URLView(GridView):
 
     async def on_focus(self):
         await self.url_field.focus()
+
+
+class ContentView(ScrollView):
+    content: JSON
+
+    async def set_content(self, content):
+        self.content = JSON(content)
+        await self.update(self.content)
+
+    async def search(self, value):
+        if self.content:
+            content = deepcopy(self.content)
+            content.text.highlight_regex(value, "white on yellow")
+            await self.update(content)
+
+    async def clear_search_results(self):
+        await self.focus()
+        await self.update(self.content)

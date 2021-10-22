@@ -11,7 +11,7 @@ from textual.widgets import ScrollView
 
 from rest_checker.api_reader import URL, APIReader, AsyncAPIReader
 from rest_checker.exceptions import BadUrlException, HttpError
-from rest_checker.views import URLView
+from rest_checker.views import ContentView, URLView
 from rest_checker.widgets import ApiFooter, CommandPrompt
 
 
@@ -20,7 +20,7 @@ class RestChecker(App):
 
     footer: ApiFooter
     url_view: URLView
-    body: ScrollView
+    body: ContentView
     command_prompt: CommandPrompt
 
     content: JSON
@@ -35,7 +35,7 @@ class RestChecker(App):
         super().run(title="Rest Checker", log="textual.log", url=url)
 
     async def on_mount(self):
-        self.body = ScrollView()
+        self.body = ContentView()
         self.url_view = URLView(self.url)
         self.footer = ApiFooter()
         self.command_prompt = CommandPrompt()
@@ -47,20 +47,20 @@ class RestChecker(App):
     async def load_url(self, url):
         try:
             content, response_time = await self._get_content_with_time(url)
-            self.content = content
+            self.content = JSON(content)
         except HttpError as e:
             content = self._error_message(str(e))
             response_time = None
         except BadUrlException as e:
             content = self._error_message(str(e))
             response_time = None
-        await self.body.update(content)
+        await self.body.set_content(content)
         await self.bind("/", "search")
         self.footer.response_time = response_time
 
     async def _get_content_with_time(self, url):
         start = timeit.default_timer()
-        content = JSON(await self._get_url_content(url))
+        content = await self._get_url_content(url)
         response_time = timeit.default_timer() - start
         return (content, response_time)
 
@@ -74,18 +74,14 @@ class RestChecker(App):
         await self.load_url(self.url_view.url)
 
     async def handle_cancel_search(self):
-        await self.body.focus()
-        await self.body.update(self.content)
+        await self.body.clear_search_results()
 
     async def handle_finish_search(self):
         await self.body.focus()
         await self.bind("n", "next_result")
 
     async def on_search(self, event):
-        if self.content:
-            content = deepcopy(self.content)
-            content.text.highlight_regex(event.value, "white on yellow")
-            await self.body.update(content)
+        await self.body.search(event.value)
 
     async def on_key(self, event: events.Key) -> None:
         if event.key == "ctrl+l":
