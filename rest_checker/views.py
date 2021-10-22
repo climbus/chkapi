@@ -1,6 +1,5 @@
 from copy import deepcopy
 
-from rich.console import RenderableType
 from rich.json import JSON
 from textual.views import GridView
 from textual.widgets import Button, ScrollView
