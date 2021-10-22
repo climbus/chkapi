@@ -1,9 +1,6 @@
 import sys
 import timeit
 
-from rich.align import Align
-from rich.json import JSON
-from rich.panel import Panel
 from textual import events
 from textual.app import App
 
