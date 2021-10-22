@@ -1,13 +1,11 @@
 import sys
 import timeit
-from copy import deepcopy
 
 from rich.align import Align
 from rich.json import JSON
 from rich.panel import Panel
 from textual import events
 from textual.app import App
-from textual.widgets import ScrollView
 
 from rest_checker.api_reader import URL, APIReader, AsyncAPIReader
 from rest_checker.exceptions import BadUrlException, HttpError
@@ -22,8 +20,6 @@ class RestChecker(App):
     url_view: URLView
     body: ContentView
     command_prompt: CommandPrompt
-
-    content: JSON
 
     def __init__(self, url: str = "", **kwargs):
         super().__init__(**kwargs)
@@ -47,7 +43,6 @@ class RestChecker(App):
     async def load_url(self, url):
         try:
             content, response_time = await self._get_content_with_time(url)
-            self.content = JSON(content)
         except HttpError as e:
             content = self._error_message(str(e))
             response_time = None
