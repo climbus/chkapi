@@ -51,6 +51,7 @@ class RestChecker(App):
         await self.body.set_content(content)
         await self.bind("/", "search")
         self.footer.response_time = response_time
+        await self.body.focus()
 
     async def _get_content_with_time(self, url):
         start = timeit.default_timer()
