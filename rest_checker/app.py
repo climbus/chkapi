@@ -75,6 +75,8 @@ class RestChecker(App):
     async def on_key(self, event: events.Key) -> None:
         if event.key == "ctrl+l":
             await self.url_view.focus()
+        if event.key == "escape":
+            await self.body.focus()
         return await super().on_key(event)
 
     async def action_search(self):
