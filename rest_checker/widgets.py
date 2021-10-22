@@ -5,8 +5,8 @@ from rich.align import Align
 from rich.console import RenderableType
 from rich.panel import Panel
 from rich.text import Text
-from textual import events
-from textual.widget import Reactive
+from textual import events, message
+from textual.widget import Reactive, Widget
 from textual.widgets import Button, Footer
 from textual_inputs import TextInput
 
@@ -103,3 +103,18 @@ class ApiFooter(Footer):
                 ),
             )
         return content
+
+
+class MessageWidget(Widget):
+    message: RenderableType
+
+    def on_mount(self):
+        self.visible = False
+        self.layout_offset_y = 5
+
+    def show_message(self, message: str):
+        self.message = message
+        self.visible = True
+
+    def render(self) -> RenderableType:
+        return Panel(Align.center(self.message), style="red on black")

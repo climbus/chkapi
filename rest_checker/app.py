@@ -10,7 +10,7 @@ from textual.app import App
 from rest_checker.api_reader import URL, APIReader, AsyncAPIReader
 from rest_checker.exceptions import BadUrlException, HttpError
 from rest_checker.views import ContentView, URLView
-from rest_checker.widgets import ApiFooter, CommandPrompt
+from rest_checker.widgets import ApiFooter, CommandPrompt, MessageWidget
 
 
 class RestChecker(App):
@@ -20,6 +20,7 @@ class RestChecker(App):
     url_view: URLView
     body: ContentView
     command_prompt: CommandPrompt
+    message: MessageWidget
 
     def __init__(self, url: str = "", **kwargs):
         super().__init__(**kwargs)
@@ -35,7 +36,9 @@ class RestChecker(App):
         self.url_view = URLView(self.url)
         self.footer = ApiFooter()
         self.command_prompt = CommandPrompt()
+        self.message = MessageWidget()
         await self.view.dock(self.url_view, size=3, edge="top")
+        await self.view.dock(self.message, size=3, edge="top", z=1)
         await self.view.dock(self.footer, edge="bottom")
         await self.view.dock(self.body, edge="top")
         await self.view.dock(self.command_prompt, size=3, edge="bottom", z=1)
@@ -43,12 +46,8 @@ class RestChecker(App):
     async def load_url(self, url):
         try:
             content, response_time = await self._get_content_with_time(url)
-        except HttpError as e:
-            content = self._error_message(str(e))
-            response_time = None
-        except BadUrlException as e:
-            content = self._error_message(str(e))
-            response_time = None
+        except (HttpError, BadUrlException) as e:
+            return self.message.show_message(str(e))
         await self.body.set_content(content)
         await self.bind("/", "search")
         self.footer.response_time = response_time
