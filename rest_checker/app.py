@@ -58,9 +58,6 @@ class RestChecker(App):
         response_time = timeit.default_timer() - start
         return (content, response_time)
 
-    def _error_message(self, e: str):
-        return Panel(Align.center(e), style="red on black")
-
     async def on_load(self):
         await self.bind("q", "quit")
 
