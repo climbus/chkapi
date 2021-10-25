@@ -46,7 +46,8 @@ class ContentView(ScrollView):
         if self.content:
             self.search_results = SearchResults(value, self.content.text.plain)
             content = self._highlight_found_phrases()
-            await self.update(content)
+            await self.update(content, home=False)
+            self._scroll_to_selected(content)
 
     def _highlight_found_phrases(self):
         if len(self.search_results) == 0:
@@ -64,7 +65,12 @@ class ContentView(ScrollView):
     async def jump_to_next_search_result(self):
         self.search_results.select_next()
         content = self._highlight_found_phrases()
-        await self.update(content)
+        await self.update(content, home=False)
+        self._scroll_to_selected(content)
+
+    def _scroll_to_selected(self, content):
+        start = self.search_results.selected().start
+        self.scroll_to_center(self._lineno_from_offset(start, content))
 
     async def on_key(self, event):
         if event.key == "n":
@@ -72,3 +78,6 @@ class ContentView(ScrollView):
         if event.key == "escape":
             self.search_results.clear()
             await self.update(self.content)
+
+    def _lineno_from_offset(self, offset, content):
+        return len(content.text[:offset].split("\n"))
