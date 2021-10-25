@@ -1,13 +1,11 @@
-import re
-from collections import namedtuple
 from copy import deepcopy
-from typing import List, Tuple
 
 from rich.json import JSON
 from textual.views import GridView
 from textual.widgets import Button, ScrollView
 
 import rest_checker.widgets
+from rest_checker.search import SearchResults
 
 
 class URLView(GridView):
@@ -74,35 +72,3 @@ class ContentView(ScrollView):
         if event.key == "escape":
             self.search_results.clear()
             await self.update(self.content)
-
-
-Occurrence = namedtuple("Occurence", "start stop")
-
-
-class SearchResults:
-    def __init__(self, value: str, content: str):
-        self._selected: int = 0
-        self._i: int = 0
-        self._result: List[Occurrence] = [
-            Occurrence(*res.span()) for res in re.finditer(value, content)
-        ]
-        self.value: str = value
-
-    def select_next(self) -> Occurrence:
-        if self._selected < len(self._result) - 1:
-            self._selected += 1
-        else:
-            self._selected = 0
-        return self._result[self._selected]
-
-    def all(self) -> List[Occurrence]:
-        return self._result
-
-    def selected(self) -> Occurrence:
-        return self._result[self._selected]
-
-    def __len__(self) -> int:
-        return len(self._result)
-
-    def clear(self):
-        self._result = []
