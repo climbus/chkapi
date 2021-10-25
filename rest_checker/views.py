@@ -71,6 +71,9 @@ class ContentView(ScrollView):
     async def on_key(self, event):
         if event.key == "n":
             await self.jump_to_next_search_result()
+        if event.key == "escape":
+            self.search_results.clear()
+            await self.update(self.content)
 
 
 Occurrence = namedtuple("Occurence", "start stop")
@@ -100,3 +103,6 @@ class SearchResults:
 
     def __len__(self) -> int:
         return len(self._result)
+
+    def clear(self):
+        self._result = []
