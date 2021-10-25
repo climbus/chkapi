@@ -82,9 +82,6 @@ class RestChecker(App):
     async def action_search(self):
         await self.command_prompt.show()
 
-    async def action_next_result(self):
-        pass
-
     async def _get_url_content(self, url):
         return await self.api_reader.read_url(URL(url))
 

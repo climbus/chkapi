@@ -1,4 +1,6 @@
 from copy import deepcopy
+import re
+from typing import List, Tuple
 
 from rich.json import JSON
 from textual.views import GridView
@@ -34,17 +36,61 @@ class URLView(GridView):
 
 class ContentView(ScrollView):
     content: JSON
+    raw_content: str
 
     async def set_content(self, content):
         self.content = JSON(content)
+        self.raw_content = content
         await self.update(self.content)
 
     async def search(self, value):
         if self.content:
-            content = deepcopy(self.content)
-            content.text.highlight_regex(value, "white on yellow")
+            self.search_results = SearchResults(value, self.content.text.plain)
+            content = self._highlight_found_phrases()
             await self.update(content)
+
+    def _highlight_found_phrases(self):
+        if len(self.search_results) == 0:
+            return self.content
+        content = deepcopy(self.content)
+        for result in self.search_results.all():
+            content.text.stylize("white on yellow", *result)
+        content.text.stylize("red on yellow", *self.search_results.selected())
+        return content
 
     async def clear_search_results(self):
         await self.focus()
         await self.update(self.content)
+
+    async def jump_to_next_search_result(self):
+        self.search_results.select_next()
+        content = self._highlight_found_phrases()
+        await self.update(content)
+
+    async def on_key(self, event):
+        if event.key == "n":
+            await self.jump_to_next_search_result()
+
+
+class SearchResults:
+    def __init__(self, value: str, content: str):
+        self._selected: int = 0
+        self._i: int = 0
+        self._result: List[tuple[int, int]] = [res.span() for res in re.finditer(value, content)]
+        self.value: str = value
+
+    def select_next(self) -> Tuple[int, int]:
+        if self._selected < len(self._result) - 1:
+            self._selected += 1
+        else:
+            self._selected = 0
+        return self._result[self._selected]
+
+    def all(self) -> List[tuple[int, int]]:
+        return self._result
+
+    def selected(self) -> tuple[int, int]:
+        return self._result[self._selected]
+
+    def __len__(self) -> int:
+        return len(self._result)
