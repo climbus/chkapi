@@ -1,5 +1,6 @@
-from copy import deepcopy
 import re
+from collections import namedtuple
+from copy import deepcopy
 from typing import List, Tuple
 
 from rich.json import JSON
@@ -72,24 +73,29 @@ class ContentView(ScrollView):
             await self.jump_to_next_search_result()
 
 
+Occurrence = namedtuple("Occurence", "start stop")
+
+
 class SearchResults:
     def __init__(self, value: str, content: str):
         self._selected: int = 0
         self._i: int = 0
-        self._result: List[tuple[int, int]] = [res.span() for res in re.finditer(value, content)]
+        self._result: List[Occurrence] = [
+            Occurrence(*res.span()) for res in re.finditer(value, content)
+        ]
         self.value: str = value
 
-    def select_next(self) -> Tuple[int, int]:
+    def select_next(self) -> Occurrence:
         if self._selected < len(self._result) - 1:
             self._selected += 1
         else:
             self._selected = 0
         return self._result[self._selected]
 
-    def all(self) -> List[tuple[int, int]]:
+    def all(self) -> List[Occurrence]:
         return self._result
 
-    def selected(self) -> tuple[int, int]:
+    def selected(self) -> Occurrence:
         return self._result[self._selected]
 
     def __len__(self) -> int:
