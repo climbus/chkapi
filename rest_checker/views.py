@@ -69,12 +69,14 @@ class ContentView(ScrollView):
         self._scroll_to_selected(content)
 
     def _scroll_to_selected(self, content):
-        start = self.search_results.selected().start
-        self.scroll_to_center(self._lineno_from_offset(start, content))
+        if len(self.search_results) > 0:
+            start = self.search_results.selected().start
+            self.scroll_to_center(self._lineno_from_offset(start, content))
 
     async def on_key(self, event):
         if event.key == "n":
-            await self.jump_to_next_search_result()
+            if len(self.search_results) > 0:
+                await self.jump_to_next_search_result()
         if event.key == "escape":
             self.search_results.clear()
             await self.update(self.content)
