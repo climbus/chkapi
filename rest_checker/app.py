@@ -41,6 +41,8 @@ class RestChecker(App):
         await self.view.dock(self.command_prompt, size=3, edge="bottom", z=1)
 
     async def load_url(self, url):
+        if not url:
+            return self.message.show_message("Url is required")
         try:
             content, response_time = await self._get_content_with_time(url)
         except (HttpError, BadUrlException) as e:
@@ -87,5 +89,5 @@ class RestChecker(App):
 
 
 if __name__ == "__main__":
-    url = sys.argv[1] if len(sys.argv) > 1 else None
+    url = sys.argv[1] if len(sys.argv) > 1 else ""
     RestChecker.run(url)
