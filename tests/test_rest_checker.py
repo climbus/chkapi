@@ -1,6 +1,7 @@
 import asyncio
+from asyncio.futures import Future
 from io import StringIO
-from unittest.mock import MagicMixin, MagicMock, patch
+from unittest.mock import MagicMixin, MagicMock, Mock, patch
 
 import pytest
 from rich.console import Console
@@ -9,6 +10,7 @@ from textual.events import Key
 from rest_checker.api_reader import APIReader
 
 from rest_checker.app import RestChecker
+from rest_checker.exceptions import HttpError
 
 
 def run_on_app(func):
@@ -34,6 +36,7 @@ class TestAsyncCase:
     @pytest.fixture(autouse=True)
     def app(self):
         self.api_reader = MagicMock()
+        self.api_reader.read_url = Mock(return_value=Future())
         self.console = Console(file=StringIO())
         self.current_app = RestChecker(console=self.console, api_reader=self.api_reader)
 
@@ -47,6 +50,7 @@ class TestAsyncCase:
     async def test_should_show_error_when_url_is_empty(self):
         await self.press("ctrl+l")
         await self.press("enter")
+
         assert "Url is required" in self.screen
 
     @pytest.mark.asyncio
@@ -55,7 +59,22 @@ class TestAsyncCase:
         await self.press("ctrl+l")
         await self.write("htt")
         await self.press("enter")
+
         assert "Invalid URL" in self.screen
+
+    @pytest.mark.asyncio
+    @run_on_app
+    async def test_should_show_error_when_status_code_is_not_2xx(self):
+        self._api_reader_throws_exception(HttpError("Connection Error"))
+
+        await self.press("ctrl+l")
+        await self.write("http://localhost/")
+        await self.press("enter")
+
+        assert "Connection Error" in self.screen
+
+    def _api_reader_throws_exception(self, exception):
+        self.api_reader.read_url.return_value.set_exception(exception)
 
     @property
     def screen(self):
