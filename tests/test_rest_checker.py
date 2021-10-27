@@ -1,11 +1,12 @@
 import asyncio
 from io import StringIO
-from unittest.mock import patch
+from unittest.mock import MagicMixin, MagicMock, patch
 
 import pytest
 from rich.console import Console
 from textual.app import App
 from textual.events import Key
+from rest_checker.api_reader import APIReader
 
 from rest_checker.app import RestChecker
 
@@ -32,8 +33,9 @@ class TestAsyncCase:
 
     @pytest.fixture(autouse=True)
     def app(self):
+        self.api_reader = MagicMock()
         self.console = Console(file=StringIO())
-        self.current_app = RestChecker(console=self.console)
+        self.current_app = RestChecker(console=self.console, api_reader=self.api_reader)
 
     @pytest.mark.asyncio
     @run_on_app
