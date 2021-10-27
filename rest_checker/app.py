@@ -19,10 +19,10 @@ class RestChecker(App):
     command_prompt: CommandPrompt
     message: MessageWidget
 
-    def __init__(self, url: str = "", **kwargs):
+    def __init__(self, url: str = "", api_reader=None, **kwargs):
         super().__init__(**kwargs)
         self.url = url
-        self.api_reader = AsyncAPIReader()
+        self.api_reader = api_reader or AsyncAPIReader()
 
     @classmethod
     def run(cls, url=None):
