@@ -51,7 +51,6 @@ class RestChecker(App):
         except (HttpError, BadUrlException) as e:
             return self.message.show_message(str(e))
         await self.body.set_content(content)
-        await self.bind("/", "search")
         self.footer.response_time = response_time
         await self.body.focus()
 
@@ -62,18 +61,19 @@ class RestChecker(App):
         return (self.response.body, response_time)
 
     async def on_load(self):
-        await self.bind("q", "quit")
+        await self.bind("q", "quit", "Quit")
 
     async def handle_url_changed(self):
         await self.load_url(self.url_view.url)
-        await self.bind("h", "show_headers")
+        await self.bind("/", "search", "Search")
+        await self.bind("h", "show_headers", "Headers")
 
     async def handle_cancel_search(self):
         await self.body.clear_search_results()
 
     async def handle_finish_search(self):
         await self.body.focus()
-        await self.bind("n", "next_result")
+        await self.bind("n", "next_result", "Next")
 
     async def on_search(self, event):
         await self.body.search(event.value)
