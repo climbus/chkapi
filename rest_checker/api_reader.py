@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from http import HTTPStatus
-from typing import Dict, Optional, Protocol
+from typing import Dict, Protocol
 from urllib.parse import urlparse
 
 import httpx
@@ -10,9 +10,9 @@ from rest_checker.exceptions import BadUrlException, HttpError
 
 class Response:
     body: str
-    headers: Optional[dict]
+    headers: dict
 
-    def __init__(self, body: str, headers: Optional[dict] = None) -> None:
+    def __init__(self, body: str, headers: dict) -> None:
         self.body = body
         self.headers = headers
 

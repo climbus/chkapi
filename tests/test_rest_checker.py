@@ -80,7 +80,7 @@ class TestAsyncCase:
     @run_on_app
     async def test_should_return_json_from_url(self):
         json = '{"a": 1}'
-        self._api_reader_returns_response_with_json(Response(json))
+        self._api_reader_returns_response_with_json(Response(json, headers={}))
 
         await self.press("ctrl+l")
         await self.write("http://localhost/")

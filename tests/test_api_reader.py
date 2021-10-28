@@ -1,7 +1,7 @@
 import pytest
 from pytest_httpserver.httpserver import HTTPServer
 
-from rest_checker.api_reader import URL, AsyncAPIReader, Response
+from rest_checker.api_reader import URL, AsyncAPIReader
 from rest_checker.exceptions import BadUrlException, HttpError
 
 
