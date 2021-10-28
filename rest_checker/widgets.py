@@ -5,7 +5,7 @@ from rich.align import Align
 from rich.console import RenderableType
 from rich.panel import Panel
 from rich.text import Text
-from textual import events, message
+from textual import events
 from textual.widget import Reactive, Widget
 from textual.widgets import Button, Footer
 from textual_inputs import TextInput
@@ -125,6 +125,7 @@ class HeadersWidget(Widget):
 
     def on_mount(self):
         self.visible = False
+        self.layout_offset_y = 3
 
     def show(self, headers: dict):
         self.headers = headers
@@ -134,7 +135,11 @@ class HeadersWidget(Widget):
         self.visible = False
 
     def render(self) -> RenderableType:
-        return Panel("\n".join(f"{key} {val}" for key, val in self.headers.items()))
+        column_len = max([len(key) for key in self.headers.keys()])
+        formatted_headers = [
+            f"{key.ljust(column_len)}: {val}" for key, val in self.headers.items()
+        ]
+        return Panel("\n".join(formatted_headers))
 
     def on_key(self, event):
         if event.key == "escape":
