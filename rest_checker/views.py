@@ -80,6 +80,7 @@ class ContentView(ScrollView):
         if event.key == "escape":
             self.search_results.clear()
             await self.update(self.content)
+            await self.app.unbind("n")
 
     def _lineno_from_offset(self, offset, content):
         return len(content.text[:offset].split("\n"))

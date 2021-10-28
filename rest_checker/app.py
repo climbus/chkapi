@@ -60,6 +60,16 @@ class RestChecker(App):
         response_time = timeit.default_timer() - start
         return (self.response.body, response_time)
 
+    async def bind(self, keys: str, action: str, description: str = "") -> None:
+        await super().bind(keys, action, description=description)
+        if hasattr(self, "footer"):
+            self.footer.update_keys()
+
+    async def unbind(self, key):
+        self.bindings.keys.pop(key)
+        self.footer.update_keys()
+        self.footer.refresh()
+
     async def on_load(self):
         await self.bind("q", "quit", "Quit")
 

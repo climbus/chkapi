@@ -104,6 +104,10 @@ class ApiFooter(Footer):
             )
         return content
 
+    def update_keys(self):
+        self._key_text = None
+        self.refresh()
+
 
 class MessageWidget(Widget):
     message: RenderableType
