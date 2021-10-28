@@ -100,6 +100,21 @@ class TestAsyncCase:
         assert self.screen_contains(r"Header1.*val 1")
         assert self.screen_contains(r"header-2.*val 2")
 
+    @pytest.mark.asyncio
+    @run_on_app
+    async def test_esc_should_hide_headers(self):
+        headers = {"Header1": "val 1", "header-2": "val 2"}
+        self._api_reader_returns_response_with_json(Response("{}", headers=headers))
+
+        await self.press("ctrl+l")
+        await self.write("http://localhost/")
+        await self.press("enter")
+        await self.press("h")
+        self.new_screen_capture()
+        await self.press("escape")
+        assert not self.screen_contains(r"Header1.*val 1")
+        assert not self.screen_contains(r"header-2.*val 2")
+
     def screen_contains(self, content_regexp):
         return re.search(content_regexp, self.screen)
 
@@ -109,6 +124,9 @@ class TestAsyncCase:
     @property
     def screen(self):
         return self.current_app.console.file.getvalue()
+
+    def new_screen_capture(self):
+        self.current_app.console.file.truncate(0)
 
     async def press_ctrl_c(self):
         await self.current_app.press("ctrl+c")

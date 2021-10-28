@@ -130,5 +130,12 @@ class HeadersWidget(Widget):
         self.headers = headers
         self.visible = True
 
+    def hide(self):
+        self.visible = False
+
     def render(self) -> RenderableType:
         return Panel("\n".join(f"{key} {val}" for key, val in self.headers.items()))
+
+    def on_key(self, event):
+        if event.key == "escape":
+            self.hide()

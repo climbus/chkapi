@@ -7,8 +7,7 @@ from textual.app import App
 from rest_checker.api_reader import URL, APIReader, AsyncAPIReader
 from rest_checker.exceptions import BadUrlException, HttpError
 from rest_checker.views import ContentView, URLView
-from rest_checker.widgets import (ApiFooter, CommandPrompt, HeadersWidget,
-                                  MessageWidget)
+from rest_checker.widgets import ApiFooter, CommandPrompt, HeadersWidget, MessageWidget
 
 
 class RestChecker(App):
@@ -91,6 +90,7 @@ class RestChecker(App):
 
     async def action_show_headers(self):
         self.headers.show(self.response.headers)
+        await self.headers.focus()
 
     async def _get_url_content(self, url):
         return await self.api_reader.read_url(URL(url))
