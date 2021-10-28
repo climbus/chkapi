@@ -1,6 +1,7 @@
 import asyncio
 from asyncio.futures import Future
 from io import StringIO
+import re
 from unittest.mock import MagicMixin, MagicMock, Mock, patch
 
 import pytest
@@ -73,6 +74,20 @@ class TestAsyncCase:
 
         assert "Connection Error" in self.screen
 
+    @pytest.mark.asyncio
+    @run_on_app
+    async def test_should_return_json_from_url(self):
+        json = '{"a": 1}'
+        self._api_reader_returns_json(json)
+
+        await self.press("ctrl+l")
+        await self.write("http://localhost/")
+        await self.press("enter")
+        assert self.screen_contains_json(r"{[\s\n]+\"a\":\s1[\s\n]+}")
+
+    def screen_contains_json(self, json_regexp):
+        return re.search(json_regexp, self.screen)
+
     def api_reader_throws_exception(self, exception):
         self.api_reader.read_url.return_value.set_exception(exception)
 
@@ -89,4 +104,7 @@ class TestAsyncCase:
 
     async def write(self, text):
         for char in text:
-            await self.press(char)
+            await self.current_app.post_message(Key(self.current_app, key=char))
+
+    def _api_reader_returns_json(self, data):
+        self.api_reader.read_url.return_value.set_result(data)
