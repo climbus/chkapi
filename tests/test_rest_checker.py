@@ -85,10 +85,22 @@ class TestAsyncCase:
         await self.press("ctrl+l")
         await self.write("http://localhost/")
         await self.press("enter")
-        assert self.screen_contains_json(r"{[\s\n]+\"a\":\s1[\s\n]+}")
+        assert self.screen_contains(r"{[\s\n]+\"a\":\s1[\s\n]+}")
 
-    def screen_contains_json(self, json_regexp):
-        return re.search(json_regexp, self.screen)
+    @pytest.mark.asyncio
+    @run_on_app
+    async def test_should_show_headers(self):
+        headers =  {"Header1": "val 1", "header-2": "val 2"}
+        self._api_reader_returns_response_with_json(Response("{}", headers=headers))
+
+        await self.press("ctrl+l")
+        await self.write("http://localhost/")
+        await self.press("enter")
+        await self.press("h")
+        assert self.screen_contains(r"Header1\s+val 1[\s\n]+header-2\s+val 2")
+
+    def screen_contains(self, content_regexp):
+        return re.search(content_regexp, self.screen)
 
     def api_reader_throws_exception(self, exception):
         self.api_reader.read_url.return_value.set_exception(exception)

@@ -11,7 +11,7 @@ from rest_checker.exceptions import BadUrlException, HttpError
 class Response:
     body: str
 
-    def __init__(self, body) -> None:
+    def __init__(self, body, headers=None) -> None:
         self.body = body
 
     def __eq__(self, other):
