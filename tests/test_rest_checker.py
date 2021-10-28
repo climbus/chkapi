@@ -65,7 +65,7 @@ class TestAsyncCase:
     @pytest.mark.asyncio
     @run_on_app
     async def test_should_show_error_when_status_code_is_not_2xx(self):
-        self._api_reader_throws_exception(HttpError("Connection Error"))
+        self.api_reader_throws_exception(HttpError("Connection Error"))
 
         await self.press("ctrl+l")
         await self.write("http://localhost/")
@@ -73,7 +73,7 @@ class TestAsyncCase:
 
         assert "Connection Error" in self.screen
 
-    def _api_reader_throws_exception(self, exception):
+    def api_reader_throws_exception(self, exception):
         self.api_reader.read_url.return_value.set_exception(exception)
 
     @property
