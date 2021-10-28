@@ -118,3 +118,17 @@ class MessageWidget(Widget):
 
     def render(self) -> RenderableType:
         return Panel(Align.center(self.message), style="red on black")
+
+
+class HeadersWidget(Widget):
+    headers: dict
+
+    def on_mount(self):
+        self.visible = False
+
+    def show(self, headers: dict):
+        self.headers = headers
+        self.visible = True
+
+    def render(self) -> RenderableType:
+        return Panel("\n".join(f"{key} {val}" for key, val in self.headers.items()))

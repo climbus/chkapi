@@ -90,14 +90,15 @@ class TestAsyncCase:
     @pytest.mark.asyncio
     @run_on_app
     async def test_should_show_headers(self):
-        headers =  {"Header1": "val 1", "header-2": "val 2"}
+        headers = {"Header1": "val 1", "header-2": "val 2"}
         self._api_reader_returns_response_with_json(Response("{}", headers=headers))
 
         await self.press("ctrl+l")
         await self.write("http://localhost/")
         await self.press("enter")
         await self.press("h")
-        assert self.screen_contains(r"Header1\s+val 1[\s\n]+header-2\s+val 2")
+        assert self.screen_contains(r"Header1.*val 1")
+        assert self.screen_contains(r"header-2.*val 2")
 
     def screen_contains(self, content_regexp):
         return re.search(content_regexp, self.screen)

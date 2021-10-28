@@ -22,7 +22,7 @@ async def test_should_get_content_from_server(httpserver: HTTPServer):
     reader = AsyncAPIReader()
     result = await reader.read_url(URL(url))
 
-    assert result == Response(expected_result)
+    assert result.body == expected_result
 
 
 @pytest.mark.asyncio
@@ -44,6 +44,19 @@ async def test_should_raise_http_error_when_connection_error(httpserver: HTTPSer
     httpserver.stop()
     url = httpserver.url_for(path)
     reader = AsyncAPIReader()
-
     with pytest.raises(HttpError, match="Connection Error"):
         await reader.read_url(URL(url))
+    httpserver.start()
+
+
+@pytest.mark.asyncio
+async def test_should_get_headers_from_server(httpserver: HTTPServer):
+    path = "/"
+    headers = {"header": "val"}
+    httpserver.expect_request(path).respond_with_data("{}", status=200, headers=headers)
+    url = httpserver.url_for(path)
+
+    reader = AsyncAPIReader()
+    result = await reader.read_url(URL(url))
+
+    assert result.headers["header"] == headers["header"]

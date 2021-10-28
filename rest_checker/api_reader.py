@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from http import HTTPStatus
-from typing import Dict, Protocol
+from typing import Dict, Optional, Protocol
 from urllib.parse import urlparse
 
 import httpx
@@ -10,12 +10,14 @@ from rest_checker.exceptions import BadUrlException, HttpError
 
 class Response:
     body: str
+    headers: Optional[dict]
 
-    def __init__(self, body, headers=None) -> None:
+    def __init__(self, body: str, headers: Optional[dict] = None) -> None:
         self.body = body
+        self.headers = headers
 
     def __eq__(self, other):
-        return self.body == other.body
+        return self.body == other.body and self.headers == other.headers
 
 
 @dataclass
@@ -63,4 +65,4 @@ class AsyncAPIReader(object):
             if result.status_code != 200:
                 raise HttpError(self.status_list[result.status_code])
 
-            return Response(result.text)
+            return Response(result.text, headers=result.headers)
