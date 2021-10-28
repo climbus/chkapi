@@ -54,9 +54,9 @@ class RestChecker(App):
 
     async def _get_content_with_time(self, url):
         start = timeit.default_timer()
-        content = await self._get_url_content(url)
+        response = await self._get_url_content(url)
         response_time = timeit.default_timer() - start
-        return (content, response_time)
+        return (response.body, response_time)
 
     async def on_load(self):
         await self.bind("q", "quit")

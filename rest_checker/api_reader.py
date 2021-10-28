@@ -8,6 +8,16 @@ import httpx
 from rest_checker.exceptions import BadUrlException, HttpError
 
 
+class Response:
+    body: str
+
+    def __init__(self, body) -> None:
+        self.body = body
+
+    def __eq__(self, other):
+        return self.body == other.body
+
+
 @dataclass
 class URL:
     url: str
@@ -19,7 +29,7 @@ class URL:
 
 
 class APIReader(Protocol):
-    async def read_url(self, url: URL) -> str:
+    async def read_url(self, url: URL) -> Response:
         ...
 
 
@@ -38,7 +48,7 @@ class AsyncAPIReader(object):
             ]
         )
 
-    async def read_url(self, url: URL) -> str:
+    async def read_url(self, url: URL) -> Response:
         if not url:
             raise BadUrlException()
 
@@ -53,4 +63,4 @@ class AsyncAPIReader(object):
             if result.status_code != 200:
                 raise HttpError(self.status_list[result.status_code])
 
-            return result.text
+            return Response(result.text)

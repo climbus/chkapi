@@ -1,15 +1,15 @@
 import asyncio
+import re
 from asyncio.futures import Future
 from io import StringIO
-import re
-from unittest.mock import MagicMixin, MagicMock, Mock, patch
+from unittest.mock import MagicMock, Mock, patch
 
 import pytest
 from rich.console import Console
 from textual.app import App
 from textual.events import Key
-from rest_checker.api_reader import APIReader
 
+from rest_checker.api_reader import Response
 from rest_checker.app import RestChecker
 from rest_checker.exceptions import HttpError
 
@@ -80,7 +80,7 @@ class TestAsyncCase:
     @run_on_app
     async def test_should_return_json_from_url(self):
         json = '{"a": 1}'
-        self._api_reader_returns_json(json)
+        self._api_reader_returns_response_with_json(Response(json))
 
         await self.press("ctrl+l")
         await self.write("http://localhost/")
@@ -108,5 +108,5 @@ class TestAsyncCase:
         for char in text:
             await self.current_app.post_message(Key(self.current_app, key=char))
 
-    def _api_reader_returns_json(self, data):
+    def _api_reader_returns_response_with_json(self, data):
         self.api_reader.read_url.return_value.set_result(data)

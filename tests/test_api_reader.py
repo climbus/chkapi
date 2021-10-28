@@ -1,7 +1,7 @@
 import pytest
 from pytest_httpserver.httpserver import HTTPServer
 
-from rest_checker.api_reader import URL, AsyncAPIReader
+from rest_checker.api_reader import URL, AsyncAPIReader, Response
 from rest_checker.exceptions import BadUrlException, HttpError
 
 
@@ -22,7 +22,7 @@ async def test_should_get_content_from_server(httpserver: HTTPServer):
     reader = AsyncAPIReader()
     result = await reader.read_url(URL(url))
 
-    assert result == expected_result
+    assert result == Response(expected_result)
 
 
 @pytest.mark.asyncio
