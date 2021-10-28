@@ -39,7 +39,9 @@ class TestAsyncCase:
         self.api_reader = MagicMock()
         self.api_reader.read_url = Mock(return_value=Future())
         self.console = Console(file=StringIO())
-        self.current_app = RestChecker(console=self.console, api_reader=self.api_reader)
+        self.current_app = RestChecker(
+            console=self.console, api_reader=self.api_reader, log="test.log"
+        )
 
     @pytest.mark.asyncio
     @run_on_app
