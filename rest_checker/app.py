@@ -68,7 +68,6 @@ class RestChecker(App):
     async def unbind(self, key):
         self.bindings.keys.pop(key)
         self.footer.update_keys()
-        self.footer.refresh()
 
     async def on_load(self):
         await self.bind("q", "quit", "Quit")
