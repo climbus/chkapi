@@ -105,6 +105,10 @@ class RestChecker(App):
         return await self.api_reader.read_url(URL(url))
 
 
-if __name__ == "__main__":
+
+def main():
     url = sys.argv[1] if len(sys.argv) > 1 else ""
     RestChecker.run(url)
+
+if __name__ == "__main__":
+    main()
