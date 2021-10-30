@@ -10,7 +10,7 @@ from textual.widget import Reactive, Widget
 from textual.widgets import Button, Footer
 from textual_inputs import TextInput
 
-from rest_checker.events import CancelSearch, FinishSearch, Search, UrlChanged
+from chkapi.events import CancelSearch, FinishSearch, Search, UrlChanged
 
 
 class URLButton(Button, can_focus=True):
@@ -106,7 +106,7 @@ class ApiFooter(Footer):
 
     def update_keys(self):
         self._key_text = None
-        self.refresh()
+        # self.refresh()
 
 
 class MessageWidget(Widget):
@@ -116,12 +116,15 @@ class MessageWidget(Widget):
         self.visible = False
         self.layout_offset_y = 5
 
-    def show_message(self, message: str):
+    def show(self, message: str):
         self.message = message
         self.visible = True
 
     def render(self) -> RenderableType:
         return Panel(Align.center(self.message), style="red on black")
+
+    def hide(self):
+        self.visible = False
 
 
 class HeadersWidget(Widget):

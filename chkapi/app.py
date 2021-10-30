@@ -4,13 +4,13 @@ import timeit
 from textual import events
 from textual.app import App
 
-from rest_checker.api_reader import URL, APIReader, AsyncAPIReader
-from rest_checker.exceptions import BadUrlException, HttpError
-from rest_checker.views import ContentView, URLView
-from rest_checker.widgets import ApiFooter, CommandPrompt, HeadersWidget, MessageWidget
+from chkapi.api_reader import URL, APIReader, AsyncAPIReader
+from chkapi.exceptions import BadUrlException, HttpError
+from chkapi.views import ContentView, URLView
+from chkapi.widgets import ApiFooter, CommandPrompt, HeadersWidget, MessageWidget
 
 
-class RestChecker(App):
+class CheckApiApp(App):
     api_reader: APIReader
 
     footer: ApiFooter
@@ -45,14 +45,16 @@ class RestChecker(App):
 
     async def load_url(self, url):
         if not url:
-            return self.message.show_message("Url is required")
+            return self.message.show("Url is required")
         try:
             content, response_time = await self._get_content_with_time(url)
         except (HttpError, BadUrlException) as e:
-            return self.message.show_message(str(e))
+            self.message.show(str(e))
+            return False
         await self.body.set_content(content)
         self.footer.response_time = response_time
         await self.body.focus()
+        return True
 
     async def _get_content_with_time(self, url):
         start = timeit.default_timer()
@@ -64,6 +66,7 @@ class RestChecker(App):
         await super().bind(keys, action, description=description)
         if hasattr(self, "footer"):
             self.footer.update_keys()
+            self.footer.refresh()
 
     async def unbind(self, key):
         self.bindings.keys.pop(key)
@@ -73,9 +76,10 @@ class RestChecker(App):
         await self.bind("q", "quit", "Quit")
 
     async def handle_url_changed(self):
-        await self.load_url(self.url_view.url)
-        await self.bind("/", "search", "Search")
-        await self.bind("h", "show_headers", "Headers")
+        loaded = await self.load_url(self.url_view.url)
+        if loaded:
+            await self.bind("/", "search", "Search")
+            await self.bind("h", "show_headers", "Headers")
 
     async def handle_cancel_search(self):
         await self.body.clear_search_results()
@@ -91,6 +95,7 @@ class RestChecker(App):
         if event.key == "ctrl+l":
             await self.url_view.focus()
         if event.key == "escape":
+            self.message.hide()
             await self.body.focus()
         return await super().on_key(event)
 
@@ -108,7 +113,7 @@ class RestChecker(App):
 
 def main():
     url = sys.argv[1] if len(sys.argv) > 1 else ""
-    RestChecker.run(url)
+    CheckApiApp.run(url)
 
 if __name__ == "__main__":
     main()

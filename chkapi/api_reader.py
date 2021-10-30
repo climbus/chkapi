@@ -5,7 +5,7 @@ from urllib.parse import urlparse
 
 import httpx
 
-from rest_checker.exceptions import BadUrlException, HttpError
+from chkapi.exceptions import BadUrlException, HttpError
 
 
 class Response:

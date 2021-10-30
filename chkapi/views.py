@@ -4,18 +4,18 @@ from rich.json import JSON
 from textual.views import GridView
 from textual.widgets import Button, ScrollView
 
-import rest_checker.widgets
-from rest_checker.search import SearchResults
+import chkapi.widgets
+from chkapi.search import EmptySearchResults, SearchResults
 
 
 class URLView(GridView):
-    url_field: rest_checker.widgets.URLField
+    url_field: chkapi.widgets.URLField
     button: Button
 
     def __init__(self, url: str) -> None:
         super().__init__()
-        self.url_field = rest_checker.widgets.URLField(url)
-        self.button = rest_checker.widgets.URLButton()
+        self.url_field = chkapi.widgets.URLField(url)
+        self.button = chkapi.widgets.URLButton()
 
     async def on_mount(self):
         self.grid.add_column("url")
@@ -36,6 +36,7 @@ class URLView(GridView):
 class ContentView(ScrollView):
     content: JSON
     raw_content: str
+    search_results = EmptySearchResults()
 
     async def set_content(self, content):
         self.content = JSON(content)
@@ -78,9 +79,10 @@ class ContentView(ScrollView):
             if len(self.search_results) > 0:
                 await self.jump_to_next_search_result()
         if event.key == "escape":
-            self.search_results.clear()
-            await self.update(self.content)
-            await self.app.unbind("n")
+            if self.search_results:
+                self.search_results.clear()
+                await self.update(self.content)
+                await self.app.unbind("n")
 
     def _lineno_from_offset(self, offset, content):
         return len(content.text[:offset].split("\n"))

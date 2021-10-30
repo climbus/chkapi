@@ -1,7 +1,7 @@
 import pytest
 
-from rest_checker.api_reader import URL
-from rest_checker.exceptions import BadUrlException
+from chkapi.api_reader import URL
+from chkapi.exceptions import BadUrlException
 
 
 def test_not_valid_url_addrress_should_raise_bad_url_error():
