@@ -5,6 +5,8 @@ description = "Console based app for browsing API"
 authors = ["Jarosław Kulesza <climbus@gmail.com>"]
 license = "MIT"
 repository = "https://github.com/climbus/chkapi"
+homepage = "https://github.com/climbus/chkapi"
+readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.8"
