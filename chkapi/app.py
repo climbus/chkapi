@@ -8,10 +8,12 @@ from chkapi.api_reader import URL, APIReader, AsyncAPIReader
 from chkapi.exceptions import BadUrlException, HttpError
 from chkapi.views import ContentView, URLView
 from chkapi.widgets import ApiFooter, CommandPrompt, HeadersWidget, MessageWidget
+from chkapi.storages import Storage, TempFileStorage
 
 
 class CheckApiApp(App):
     api_reader: APIReader
+    storage: Storage
 
     footer: ApiFooter
     url_view: URLView
@@ -20,10 +22,13 @@ class CheckApiApp(App):
     message: MessageWidget
     headers: HeadersWidget
 
-    def __init__(self, url: str = "", api_reader=None, **kwargs):
+    def __init__(
+        self, url: str = "", api_reader=None, storage: Storage = None, **kwargs
+    ):
         super().__init__(**kwargs)
         self.url = url
         self.api_reader = api_reader or AsyncAPIReader()
+        self.storage = storage or TempFileStorage()
 
     @classmethod
     def run(cls, url=None):
@@ -51,6 +56,7 @@ class CheckApiApp(App):
         except (HttpError, BadUrlException) as e:
             self.message.show(str(e))
             return False
+        await self.storage.save(url)
         await self.body.set_content(content)
         self.footer.response_time = response_time
         await self.body.focus()
@@ -110,10 +116,10 @@ class CheckApiApp(App):
         return await self.api_reader.read_url(URL(url))
 
 
-
 def main():
     url = sys.argv[1] if len(sys.argv) > 1 else ""
     CheckApiApp.run(url)
+
 
 if __name__ == "__main__":
     main()
