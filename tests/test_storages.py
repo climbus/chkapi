@@ -1,8 +1,9 @@
-import pytest
 import os
 import tempfile
 
-from chkapi.storages import TempFileStorage
+import pytest
+
+from chkapi.storages import STORAGE_FILE_NAME, TempFileStorage
 
 
 @pytest.fixture(autouse=True)
@@ -18,5 +19,5 @@ async def test_save_url(tmp_path):
 
     await storage.save(url)
 
-    with open(tmp_path / ".chkapi") as fp:
+    with open(tmp_path / STORAGE_FILE_NAME) as fp:
         assert fp.readline() == url

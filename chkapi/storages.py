@@ -1,6 +1,8 @@
-from typing import Protocol
-from tempfile import gettempdir
 from pathlib import Path
+from tempfile import gettempdir
+from typing import Protocol
+
+STORAGE_FILE_NAME = ".chkapi"
 
 
 class Storage(Protocol):
@@ -11,5 +13,5 @@ class Storage(Protocol):
 class TempFileStorage:
     async def save(self, url: str):
         tmpdir = Path(gettempdir())
-        with open(tmpdir / ".chkapi", "a") as fp:
+        with open(tmpdir / STORAGE_FILE_NAME, "a") as fp:
             fp.write(url + "\n")
