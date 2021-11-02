@@ -124,7 +124,7 @@ class TestAsyncCase:
     @pytest.mark.asyncio
     @run_on_app
     async def test_search(self):
-        self._api_reader_returns_response_with_json(Response("{\"ala\": 1}", headers={}))
+        self._api_reader_returns_response_with_json(Response('{"ala": 1}', headers={}))
 
         await self.press("ctrl+l")
         await self.write("http://localhost/")
@@ -137,6 +137,27 @@ class TestAsyncCase:
         await self.press("enter")
         assert self.screen_contains(r"N.*Next")
         assert self.screen_contains(r"1;31;43mala")
+
+    @pytest.mark.asyncio
+    @run_on_app
+    async def test_show_recent_urls(self):
+        self._api_reader_returns_response_with_json(Response("{}", headers={}))
+        url = "http://localhost/"
+        await self.press("ctrl+l")
+        await self.write(url)
+        await self.press("enter")
+
+        await self.press("ctrl+l")
+        for _ in range(len(url)):
+            await self.press("delete")
+
+        self.new_screen_capture()
+
+        assert not self.screen_contains("http://localhost/")
+
+        await self.write("http")
+
+        assert self.screen_contains("http://localhost/")
 
     @pytest.mark.asyncio
     @run_on_app
