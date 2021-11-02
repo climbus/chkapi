@@ -35,3 +35,14 @@ async def test_saves_only_unique_urls(tmp_path):
 
     with open(tmp_path / STORAGE_FILE_NAME) as fp:
         assert fp.read() == f"{url2}\n{url1}"
+
+
+@pytest.mark.asyncio
+async def test_search_in_file(tmp_path):
+    with open(tmp_path / STORAGE_FILE_NAME, "w") as fp:
+        fp.write("http://localhost/\nhttp://127.0.0.1")
+
+    storage = TempFileStorage()
+    result = await storage.find("local")
+
+    assert result == ["http://localhost/"]

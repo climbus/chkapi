@@ -55,6 +55,8 @@ class URLField(TextInput):
         return self.value
 
     async def on_key(self, event: events.Key) -> None:
+        recent = await self.app.storage.find(self.value)
+        self.log(recent)
         if event.key == "enter":
             await self.emit(UrlChanged(self))
 
