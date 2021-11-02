@@ -4,6 +4,7 @@ from typing import List, Optional
 
 Occurrence = namedtuple("Occurrence", "start stop")
 
+
 class EmptySearchResults:
     def select_next(self) -> Optional[Occurrence]:
         return None
@@ -19,6 +20,7 @@ class EmptySearchResults:
 
     def clear(self):
         pass
+
 
 class SearchResults:
     """

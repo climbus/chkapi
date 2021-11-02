@@ -6,9 +6,10 @@ from textual.app import App
 
 from chkapi.api_reader import URL, APIReader, AsyncAPIReader
 from chkapi.exceptions import BadUrlException, HttpError
-from chkapi.views import ContentView, URLView
-from chkapi.widgets import ApiFooter, CommandPrompt, HeadersWidget, MessageWidget
 from chkapi.storages import Storage, TempFileStorage
+from chkapi.views import ContentView, URLView
+from chkapi.widgets import (ApiFooter, CommandPrompt, HeadersWidget,
+                            MessageWidget)
 
 
 class CheckApiApp(App):
