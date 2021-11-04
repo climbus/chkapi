@@ -5,11 +5,17 @@ from textual import events
 from textual.app import App
 
 from chkapi.api_reader import URL, APIReader, AsyncAPIReader
+from chkapi.events import UrlTyped
 from chkapi.exceptions import BadUrlException, HttpError
 from chkapi.storages import Storage, TempFileStorage
 from chkapi.views import ContentView, URLView
-from chkapi.widgets import (ApiFooter, CommandPrompt, HeadersWidget,
-                            MessageWidget)
+from chkapi.widgets import (
+    ApiFooter,
+    AutocompleteWidget,
+    CommandPrompt,
+    HeadersWidget,
+    MessageWidget,
+)
 
 
 class CheckApiApp(App):
@@ -42,7 +48,9 @@ class CheckApiApp(App):
         self.command_prompt = CommandPrompt()
         self.message = MessageWidget()
         self.headers = HeadersWidget()
+        self.autocomplete = AutocompleteWidget()
         await self.view.dock(self.url_view, size=3, edge="top")
+        await self.view.dock(self.autocomplete, edge="top", z=1)
         await self.view.dock(self.message, size=3, edge="top", z=1)
         await self.view.dock(self.headers, edge="top", z=1)
         await self.view.dock(self.footer, edge="bottom")
@@ -88,6 +96,10 @@ class CheckApiApp(App):
             await self.bind("/", "search", "Search")
             await self.bind("h", "show_headers", "Headers")
 
+    async def on_url_typed(self):
+        recent = await self.storage.find(self.url_view.url)
+        self.autocomplete.show_recent(recent)
+
     async def handle_cancel_search(self):
         await self.body.clear_search_results()
 
@@ -99,11 +111,16 @@ class CheckApiApp(App):
         await self.body.search(event.value)
 
     async def on_key(self, event: events.Key) -> None:
+        if event.key == "enter":
+            self.autocomplete.hide()
         if event.key == "ctrl+l":
             await self.url_view.focus()
         if event.key == "escape":
             self.message.hide()
-            await self.body.focus()
+            if self.autocomplete.visible:
+                self.autocomplete.hide()
+            else:
+                await self.body.focus()
         return await super().on_key(event)
 
     async def action_search(self):

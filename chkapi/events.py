@@ -1,8 +1,13 @@
 from typing import Optional
 
 import rich.repr
+from textual import events
 from textual.events import InputEvent
 from textual.message import Message, MessageTarget
+
+
+class UrlTyped(events.Event):
+    pass
 
 
 class Search(InputEvent):

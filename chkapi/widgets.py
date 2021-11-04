@@ -10,7 +10,7 @@ from textual.widget import Reactive, Widget
 from textual.widgets import Button, Footer
 from textual_inputs import TextInput
 
-from chkapi.events import CancelSearch, FinishSearch, Search, UrlChanged
+from chkapi.events import CancelSearch, FinishSearch, Search, UrlChanged, UrlTyped
 
 
 class URLButton(Button, can_focus=True):
@@ -55,10 +55,42 @@ class URLField(TextInput):
         return self.value
 
     async def on_key(self, event: events.Key) -> None:
-        recent = await self.app.storage.find(self.value)
-        self.log(recent)
         if event.key == "enter":
             await self.emit(UrlChanged(self))
+        else:
+            await self.emit(UrlTyped(self))
+
+
+class AutocompleteWidget(Widget):
+    urls = list[str]
+
+    def __init__(self) -> None:
+        self.urls = []
+        super().__init__(name=None)
+
+    async def on_mount(self):
+        self.visible = False
+        self.layout_offset_y = 3
+
+    def hide(self):
+        self.visible = False
+        self.refresh(layout=True)
+
+    def show(self):
+        self.visible = True
+        self.refresh(layout=True)
+
+    def show_recent(self, recent):
+        self.log(recent)
+        if recent:
+            self.urls = recent
+            self.show()
+        else:
+            self.urls = []
+            self.hide()
+
+    def render(self):
+        return Panel("\n".join(self.urls))
 
 
 class CommandPrompt(TextInput):

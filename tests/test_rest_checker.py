@@ -156,7 +156,7 @@ class TestAsyncCase:
         assert not self.screen_contains("http://localhost/")
 
         await self.write("http")
-
+        self.current_app.refresh()
         assert self.screen_contains("http://localhost/")
 
     @pytest.mark.asyncio

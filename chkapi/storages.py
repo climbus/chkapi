@@ -11,6 +11,9 @@ class Storage(Protocol):
     async def save(self, url: str):
         ...
 
+    async def find(self, phrase: str):
+        ...
+
 
 class TempFileStorage:
     async def save(self, url: str) -> None:
