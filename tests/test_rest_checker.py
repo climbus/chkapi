@@ -1,5 +1,7 @@
 import asyncio
+import os
 import re
+import tempfile
 from asyncio.futures import Future
 from io import StringIO
 from unittest.mock import MagicMock, Mock, patch
@@ -12,6 +14,12 @@ from textual.events import Key
 from chkapi.api_reader import Response
 from chkapi.app import CheckApiApp
 from chkapi.exceptions import HttpError
+
+
+@pytest.fixture(autouse=True)
+def set_tmpdir(tmp_path):
+    tempfile.tempdir = None
+    os.environ["TMPDIR"] = str(tmp_path)
 
 
 def run_on_app(func):
@@ -143,13 +151,7 @@ class TestAsyncCase:
     async def test_show_recent_urls(self):
         self._api_reader_returns_response_with_json(Response("{}", headers={}))
         url = "http://localhost/"
-        await self.press("ctrl+l")
-        await self.write(url)
-        await self.press("enter")
-
-        await self.press("ctrl+l")
-        for _ in range(len(url)):
-            await self.press("delete")
+        await self.url_was_used_in_the_past(url)
 
         self.new_screen_capture()
 
@@ -158,6 +160,33 @@ class TestAsyncCase:
         await self.write("http")
         self.current_app.refresh()
         assert self.screen_contains("http://localhost/")
+
+    async def url_was_used_in_the_past(self, url):
+        await self.press("ctrl+l")
+        await self.write(url)
+        await self.press("enter")
+
+        await self.press("ctrl+l")
+        for _ in range(len(url)):
+            await self.press("ctrl+h")
+
+    @pytest.mark.asyncio
+    @run_on_app
+    async def test_escape_closes_recent_urls(self):
+        self._api_reader_returns_response_with_json(Response("{}", headers={}))
+        url = "http://localhost/"
+        await self.url_was_used_in_the_past(url)
+
+        self.new_screen_capture()
+
+        assert not self.screen_contains(url)
+
+        await self.press("h")
+        assert self.screen_contains(url)
+
+        self.new_screen_capture()
+        await self.press("escape")
+        assert not self.screen_contains("test")
 
     @pytest.mark.asyncio
     @run_on_app
