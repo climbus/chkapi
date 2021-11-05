@@ -5,7 +5,7 @@ from textual import events
 from textual.app import App
 
 from chkapi.api_reader import URL, APIReader, AsyncAPIReader
-from chkapi.events import UrlTyped
+from chkapi.events import SetUrl
 from chkapi.exceptions import BadUrlException, HttpError
 from chkapi.storages import Storage, TempFileStorage
 from chkapi.views import ContentView, URLView
@@ -106,6 +106,13 @@ class CheckApiApp(App):
     async def handle_finish_search(self):
         await self.body.focus()
         await self.bind("n", "next_result", "Next")
+
+    async def handle_focus_recent(self):
+        await self.autocomplete.focus()
+
+    async def handle_set_url(self, event: SetUrl):
+        self.url_view.set_url(event.url)
+        await self.url_view.focus()
 
     async def on_search(self, event):
         await self.body.search(event.value)

@@ -29,6 +29,9 @@ class URLView(GridView):
     def url(self):
         return self.url_field.url
 
+    def set_url(self, url: str):
+        self.url_field.value = url
+
     async def on_focus(self):
         await self.url_field.focus()
 

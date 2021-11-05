@@ -32,3 +32,13 @@ class FinishSearch(Message):
 
 class UrlChanged(Message, bubble=True):
     pass
+
+
+class FocusRecent(Message):
+    pass
+
+
+class SetUrl(Message):
+    def __init__(self, sender: MessageTarget, url: str) -> None:
+        super().__init__(sender)
+        self.url = url

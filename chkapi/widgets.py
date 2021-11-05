@@ -10,7 +10,15 @@ from textual.widget import Reactive, Widget
 from textual.widgets import Button, Footer
 from textual_inputs import TextInput
 
-from chkapi.events import CancelSearch, FinishSearch, Search, UrlChanged, UrlTyped
+from chkapi.events import (
+    CancelSearch,
+    FinishSearch,
+    FocusRecent,
+    Search,
+    SetUrl,
+    UrlChanged,
+    UrlTyped,
+)
 
 
 class URLButton(Button, can_focus=True):
@@ -57,12 +65,15 @@ class URLField(TextInput):
     async def on_key(self, event: events.Key) -> None:
         if event.key == "enter":
             await self.emit(UrlChanged(self))
+        if event.key == "down":
+            await self.emit(FocusRecent(self))
         else:
             await self.emit(UrlTyped(self))
 
 
 class AutocompleteWidget(Widget):
-    urls = list[str]
+    urls: list[str]
+    current: int = -1
 
     def __init__(self) -> None:
         self.urls = []
@@ -75,10 +86,15 @@ class AutocompleteWidget(Widget):
     def hide(self):
         self.visible = False
         self.refresh(layout=True)
+        self.current = None
 
     def show(self):
         self.visible = True
         self.refresh(layout=True)
+
+    def on_focus(self):
+        self.current = 0
+        self.refresh()
 
     def show_recent(self, recent):
         self.log(recent)
@@ -89,8 +105,35 @@ class AutocompleteWidget(Widget):
             self.urls = []
             self.hide()
 
+    async def on_key(self, event: events.Key):
+        if event.key == "down":
+            self.move_current_up()
+        elif event.key == "up":
+            self.move_current_down()
+        elif event.key == "enter":
+            await self.select_current()
+
+    def move_current_up(self):
+        self.current += 1
+        self.current = self.current % len(self.urls)
+        self.refresh()
+
+    def move_current_down(self):
+        self.current -= 1
+        if self.current == -1:
+            self.current = len(self.urls) - 1
+        self.refresh()
+
+    async def select_current(self):
+        await self.emit(SetUrl(self, self.urls[self.current]))
+        self.current = -1
+        self.hide()
+
     def render(self):
-        return Panel("\n".join(self.urls))
+        text = Text()
+        for i, url in enumerate(self.urls):
+            text.append(url + "\n", "red on yellow" if self.current == i else "")
+        return Panel(text)
 
 
 class CommandPrompt(TextInput):

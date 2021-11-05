@@ -186,7 +186,25 @@ class TestAsyncCase:
 
         self.new_screen_capture()
         await self.press("escape")
-        assert not self.screen_contains("test")
+        assert not self.screen_contains(url)
+
+    @pytest.mark.asyncio
+    @run_on_app
+    async def test_select_recent_url(self):
+        self._api_reader_returns_response_with_json(Response("{}", headers={}))
+        url = "http://localhost/"
+        await self.url_was_used_in_the_past(url)
+
+        await self.press("h")
+        await self.press("down")
+
+        assert self.screen_contains(r"31;43mhttp://localhost/")
+
+        self.new_screen_capture()
+        await self.press("enter")
+
+        assert not self.screen_contains(r"31;43mhttp://localhost/")
+        assert self.screen_contains(url)
 
     @pytest.mark.asyncio
     @run_on_app
