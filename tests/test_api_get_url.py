@@ -7,11 +7,12 @@ from io import StringIO
 import re
 
 from rich.console import Console
-from pytest_bdd import scenario, when, then, parsers
+from pytest_bdd import scenario, given, when, then, parsers
 import pytest
 from textual.events import Key
 
 from chkapi.app import CheckApiApp
+from chkapi.exceptions import HttpError
 
 
 @pytest.fixture(autouse=True)
@@ -61,6 +62,11 @@ def test_invalid_url():
     pass
 
 
+@scenario("../features/api_get_url.feature", "Connection Error")
+def test_connection_error():
+    pass
+
+
 @when(parsers.parse('I press "{key}"'))
 def press(key, app, event_loop):
     new_screen_capture(app)
@@ -72,6 +78,12 @@ def press(key, app, event_loop):
 def write(text, app, event_loop):
     for key in text:
         event_loop.run_until_complete(app.post_message(Key(app, key=key)))
+
+
+@given('server responds with error')
+def server_responds_with_error(app):
+    exception = HttpError("Connection Error")
+    app.api_reader.read_url.return_value.set_exception(exception)
 
 
 @then(parsers.parse('I see "{text}" on screen'))
