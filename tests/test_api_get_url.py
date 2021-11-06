@@ -52,14 +52,26 @@ def mock_api_reader():
 
 
 @scenario("../features/api_get_url.feature", "Empty URL")
-def test_get_url():
+def test_empty_url():
+    pass
+
+
+@scenario("../features/api_get_url.feature", "Invalid URL")
+def test_invalid_url():
     pass
 
 
 @when(parsers.parse('I press "{key}"'))
 def press(key, app, event_loop):
+    new_screen_capture(app)
     event_loop.run_until_complete(app.post_message(Key(app, key=key)))
     event_loop.run_until_complete(asyncio.sleep(0.1))
+
+
+@when(parsers.parse('I write "{text}"'))
+def write(text, app, event_loop):
+    for key in text:
+        event_loop.run_until_complete(app.post_message(Key(app, key=key)))
 
 
 @then(parsers.parse('I see "{text}" on screen'))
@@ -67,5 +79,15 @@ def see(text, app):
     assert re.search(text, screen(app))
 
 
+@then(parsers.parse('I don\'t see "{text}" on screen'))
+def dont_see(text, app):
+    assert "URL" in screen(app)
+    assert not re.search(text, screen(app))
+
+
 def screen(app):
     return app.console.file.getvalue()
+
+
+def new_screen_capture(app):
+    app.console.file.truncate(0)
