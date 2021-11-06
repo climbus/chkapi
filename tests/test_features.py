@@ -7,7 +7,7 @@ from io import StringIO
 import re
 
 from rich.console import Console
-from pytest_bdd import scenario, given, when, then, parsers
+from pytest_bdd import scenarios, scenario, given, when, then, parsers
 import pytest
 from textual.events import Key
 
@@ -52,19 +52,7 @@ def mock_api_reader():
     return api_reader
 
 
-@scenario("../features/api_get_url.feature", "Empty URL")
-def test_empty_url():
-    pass
-
-
-@scenario("../features/api_get_url.feature", "Invalid URL")
-def test_invalid_url():
-    pass
-
-
-@scenario("../features/api_get_url.feature", "Connection Error")
-def test_connection_error():
-    pass
+scenarios("../features")
 
 
 @when(parsers.parse('I press "{key}"'))
