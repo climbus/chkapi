@@ -1,4 +1,5 @@
 import asyncio
+import json
 import os
 import re
 import tempfile
@@ -56,6 +57,7 @@ def mock_api_reader():
 scenarios("../features")
 
 
+@given(parsers.parse('I pressed "{key}"'))
 @when(parsers.parse('I press "{key}"'))
 def press(key, app, event_loop):
     new_screen_capture(app)
@@ -63,10 +65,13 @@ def press(key, app, event_loop):
     event_loop.run_until_complete(asyncio.sleep(0.2))
 
 
+@given(parsers.parse('I wrote "{text}"'))
 @when(parsers.parse('I write "{text}"'))
 def write(text, app, event_loop):
+    new_screen_capture(app)
     for key in text:
         event_loop.run_until_complete(app.post_message(Key(app, key=key)))
+    event_loop.run_until_complete(asyncio.sleep(0.2))
 
 
 @given("server responds with error")
@@ -81,15 +86,53 @@ def server_responds_with_data(data, app):
     app.api_reader.read_url.return_value.set_result(response)
 
 
+@given(parsers.parse("server responds with headers\n{headers}"))
+def server_responds_with_headers(headers, app):
+    response = Response("{}", headers=json.loads(headers))
+    app.api_reader.read_url.return_value.set_result(response)
+
+
+@given(parsers.parse('url "{url}" was used in the past'))
+def url_was_used(url, app, event_loop):
+    press("ctrl+l", app, event_loop)
+    write(url, app, event_loop)
+    press("enter", app, event_loop)
+    press("ctrl+l", app, event_loop)
+    delete(url, app, event_loop)
+
+
+def delete(text, app, event_loop):
+    for _ in range(len(text)):
+        event_loop.run_until_complete(app.post_message(Key(app, key="ctrl+h")))
+
+
+@given("I focused url field")
+def focus_url_field(app, event_loop):
+    event_loop.run_until_complete(app.post_message(Key(app, key="ctrl+l")))
+    event_loop.run_until_complete(asyncio.sleep(0.2))
+
+
 @then(parsers.parse('I see "{text}" on screen'))
 def see(text, app):
-    assert re.compile(text).search(screen(app))
+    assert re.compile(text).search(screen(app)), f'"{text}" not found'
 
 
 @then(parsers.parse('I don\'t see "{text}" on screen'))
 def dont_see(text, app):
+    app.refresh()
     assert "URL" in screen(app)
-    assert not re.search(text, screen(app))
+    assert not re.search(text, screen(app)), f'"{text} found'
+
+
+@then(parsers.parse('url "{url}" is selected'))
+def url_is_selected(url, app):
+    see(f"31;43m{url}", app)
+
+
+@when("log screen")
+@then("log screen")
+def log_screen(app):
+    app.log(screen(app))
 
 
 def screen(app):

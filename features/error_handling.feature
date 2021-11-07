@@ -1,15 +1,16 @@
 Feature: Error handling
     Errors occuring when working with url
 
+    Background:
+	Given I focused url field
+
     Scenario: Empty URL
-        When I press "ctrl+l"
-	And I press "enter"
+	When I press "enter"
 
 	Then I see "Url is required" on screen
 
     Scenario: Invalid URL
-	When I press "ctrl+l"
-	And I write "htt"
+	When I write "htt"
 	And I press "enter"
 
 	Then I see "Invalid URL" on screen
@@ -21,8 +22,7 @@ Feature: Error handling
     Scenario: Connection Error
 	Given server responds with error
 
-	When I press "ctrl+l"
-	And I write "http://localhost/"
+	When I write "http://localhost/"
 	And I press "enter"
 
 	Then I see "Connection Error" on screen
