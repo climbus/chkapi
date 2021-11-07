@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "chkapi"
-version = "0.1.0"
+version = "0.2.0"
 description = "Console based app for browsing API"
 authors = ["Jarosław Kulesza <climbus@gmail.com>"]
 license = "MIT"
